@@ -20,7 +20,7 @@ Use a direction session and separate role sub-sessions such as `agency-home-v1-c
 
 ## Persistent observations
 
-After viewing an original, create an observation JSON in the project:
+After viewing an original, create an observation JSON in the project. Write it in English: the shared service returns it to every reader.
 
 ```json
 {
@@ -29,9 +29,21 @@ After viewing an original, create an observation JSON in the project:
   "palette": ["green", "warm white"],
   "components": ["cards", "hero"],
   "typography": "Readable sans with size hierarchy; exact family unknown.",
-  "uncertainty": "The screenshot does not establish interaction or responsive behavior."
+  "uncertainty": "The screenshot does not establish interaction or responsive behavior.",
+  "layout": "Headline upper left at about 6% of canvas width; three cards span 70% of the width, centred on the photograph's lower third.",
+  "signature": "Cards sit directly on the landscape with no frame, so the photo reads as the product's environment.",
+  "recipe": "Full-bleed photo section; one flex row of equal cards with 24px gaps, white fill, 16px radius; headline outside the photo above it.",
+  "colors": ["#f6f5f1", "#5d7a3e", "#1c1c1a"]
 }
 ```
+
+`layout`, `signature`, `recipe`, and `colors` are optional but are what let another agent rebuild the idea without the pixels. Write proportions and relationships (percent of width, which edge things align to, relative type sizes), not adjectives. Take `colors` from measured pixels, never from memory:
+
+```sh
+python "<skill>/scripts/vault.py" colors --image "123456789:0"
+```
+
+The command quantizes the original and prints up to eight hex values with their share of the image. Photographed screens shift color; say so in `uncertainty` when it applies.
 
 ```sh
 python "<skill>/scripts/vault.py" describe --image "123456789:0" --input "<project>/output/observation.json"

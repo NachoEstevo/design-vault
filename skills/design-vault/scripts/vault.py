@@ -69,6 +69,9 @@ def brief(image, score=None):
               "tags": image["tags"][:12], "analysed": bool(analysis)}
     if analysis:
         result["visual_summary"] = analysis["summary"][:500]
+        for field in ("layout", "signature", "recipe", "colors", "typography"):
+            if analysis.get(field):
+                result[field] = analysis[field]
     if score is not None:
         result["relevance"] = round(score, 3)
     return result
@@ -233,6 +236,25 @@ def contact_sheet(catalog, key, output):
     return {"sheet": str(output), "images": len(ids), "session": key}
 
 
+def sample_colors(catalog, image_id, count=6):
+    """Measure dominant colors from the original's pixels so observations cite real values."""
+    try:
+        from PIL import Image, ImageOps
+    except ImportError as error:
+        raise ValueError("Color sampling requires Pillow.") from error
+    image = catalog.image(image_id)
+    with Image.open(Path(image["path"])) as original:
+        preview = ImageOps.exif_transpose(original).convert("RGB")
+        preview.thumbnail((200, 200))
+        quantized = preview.quantize(colors=count, method=Image.Quantize.MEDIANCUT)
+        palette = quantized.getpalette()[:count * 3]
+        counts = sorted(quantized.getcolors(), reverse=True)
+    total = sum(n for n, _ in counts)
+    colors = [{"hex": "#%02x%02x%02x" % tuple(palette[index * 3:index * 3 + 3]),
+               "share": round(n / total, 3)} for n, index in counts]
+    return {"image_id": image_id, "colors": colors}
+
+
 def parser():
     command = argparse.ArgumentParser(description=__doc__)
     command.add_argument("--root", help="Vault root; overrides local configuration for this command")
@@ -254,6 +276,9 @@ def parser():
     describe = commands.add_parser("describe")
     describe.add_argument("--image", required=True)
     describe.add_argument("--input", required=True)
+    colors = commands.add_parser("colors")
+    colors.add_argument("--image", required=True)
+    colors.add_argument("--count", type=int, default=6)
     state = commands.add_parser("session")
     state.add_argument("--session", required=True)
     return command
@@ -282,6 +307,8 @@ def main():
             result = choose(catalog, args.session, args.ids)
         elif args.command == "sheet":
             result = contact_sheet(catalog, args.session, args.out)
+        elif args.command == "colors":
+            result = sample_colors(catalog, args.image, max(2, min(args.count, 8)))
         elif args.command == "describe":
             result = catalog.describe(args.image, read_json(Path(args.input), 16 * 1024))
         else:

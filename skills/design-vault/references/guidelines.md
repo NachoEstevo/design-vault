@@ -20,6 +20,18 @@ These defaults reflect the original owner's preferences. Apply them unless the u
 - Prefer `transform` and `opacity`, with color feedback where appropriate. Avoid layout animation and `transition: all`. Restrict hover to capable pointers, with keyboard and touch feedback. Never delay functional clicks or focus for motion.
 - Respect `prefers-reduced-motion`, including changes during a session. Keep content visible without JavaScript or optional observation APIs. Immediately reveal keyboard-focused content. Check entrances, scroll, hover/press, dialogs, and reduced motion; still images do not verify animation.
 
+## Avoid the default template
+
+Generated pages tend to converge on one layout. Treat these as signals to reconsider, not as banned shapes; keep one when the content genuinely calls for it:
+
+- A centered hero, a row of three identical icon cards, a logo strip, and a gradient CTA band, in that order.
+- Purple-to-blue or mesh gradients, glass panels, and glow used as a substitute for a palette decision.
+- Generic icons in tinted circles standing in for real content, screenshots, or samples.
+- Every section with the same width, alignment, padding, and heading size.
+- Invented testimonials, logos, metrics, or "trusted by" rows.
+
+Instead, let one reference set the composition, vary section rhythm by content (a full-bleed moment, a dense comparison, a quiet text block), and show the actual product: real commands, real output, real interface states.
+
 ## General criteria
 
 - Resolve content, hierarchy, audience, and the primary action before decoration. Preserve project brands and components unless redesign is requested.
@@ -31,6 +43,7 @@ These defaults reflect the original owner's preferences. Apply them unless the u
 - Check realistic long text, loading, empty, error, and success states. A screenshot's appearance does not prove interaction.
 - Check small screens, keyboard navigation, visible focus, contrast, and reduced motion. Essential text and controls must not exist only inside images.
 - Choose type for function and character using [typography.md](typography.md). Do not guess an exact family from a screenshot.
+- Build color by role using [color.md](color.md): one accent with a job, neutrals with a temperature, and checked contrast.
 - Give the design its own rationale: composition from one reference, rhythm from another, a compatible palette from a third. Do not combine complete competing visual languages.
 - Retain reference IDs and source links. Distinguish observations, the user's written intent, and new decisions.
 

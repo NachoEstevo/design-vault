@@ -12,7 +12,7 @@ from unittest.mock import patch
 SCRIPTS = Path(__file__).resolve().parents[1] / "skills" / "design-vault" / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 from catalog import Catalog
-from vault import choose, contact_sheet, search, select, retrieve
+from vault import brief, choose, contact_sheet, sample_colors, search, select, retrieve
 
 PNG = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jC0kAAAAASUVORK5CYII=")
 
@@ -150,6 +150,37 @@ class VaultTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.catalog.describe("1001:0", {"summary": "A concrete visual description"})
         self.assertEqual(path.read_bytes(), before)
+
+    def test_reconstruction_fields_persist_and_reach_briefs(self):
+        self.reference()
+        self.catalog.refresh()
+        self.catalog.describe("1001:0", {"summary": "White panel inset over a dark photograph",
+                                         "layout": "Panel inset 10% on every side; headline upper left",
+                                         "signature": "Photo strip with staggered heights touching both panel edges",
+                                         "recipe": "Build the panel first, then the strip as one flex row",
+                                         "colors": ["#F4F4F2", "#111111"]})
+        image = self.catalog.image("1001:0")
+        self.assertEqual(image["analysis"]["colors"], ["#f4f4f2", "#111111"])
+        self.assertIn("staggered", brief(image)["signature"])
+        self.assertEqual(search(self.catalog, "staggered strip", "strip-v1")["candidates"][0]["id"], "1001:0")
+
+    def test_invalid_colors_are_rejected(self):
+        self.reference()
+        self.catalog.refresh()
+        for colors in (["blue"], ["#fff"], ["#000000"] * 9):
+            with self.assertRaises(ValueError):
+                self.catalog.describe("1001:0", {"summary": "A concrete visual description", "colors": colors})
+
+    def test_colors_are_sampled_from_pixels(self):
+        try:
+            import PIL  # noqa: F401
+        except ImportError:
+            self.skipTest("Pillow is not installed")
+        self.reference()
+        self.catalog.refresh()
+        colors = sample_colors(self.catalog, "1001:0")["colors"]
+        self.assertTrue(colors and all(c["hex"].startswith("#") for c in colors))
+        self.assertAlmostEqual(sum(c["share"] for c in colors), 1, places=2)
 
     def test_renamed_image_has_real_safe_path(self):
         folder, data = self.reference()

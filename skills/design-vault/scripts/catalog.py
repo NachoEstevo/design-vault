@@ -270,4 +270,14 @@ def validate_observation(value):
         result[field] = [text(item, 100) for item in values]
     for field in ("typography", "uncertainty"):
         result[field] = text(value.get(field, ""), 600)
+    # Reconstruction detail: geometry, the device worth taking, how to rebuild it, sampled colors.
+    for field, limit in (("layout", 600), ("signature", 400), ("recipe", 1200)):
+        if field in value:
+            result[field] = text(value.get(field, ""), limit)
+    if "colors" in value:
+        colors = value["colors"]
+        if not isinstance(colors, list) or len(colors) > 8 or not all(
+                isinstance(item, str) and re.fullmatch(r"#[0-9a-fA-F]{6}", item) for item in colors):
+            raise ValueError("colors must be up to eight #rrggbb values")
+        result["colors"] = [item.lower() for item in colors]
     return result

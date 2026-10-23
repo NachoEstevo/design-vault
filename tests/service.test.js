@@ -64,6 +64,9 @@ async function fixture() {
           palette: ["cream"],
           components: ["cards"],
           typography: "Serif headings",
+          layout: "Three cards on a wide row",
+          signature: "Cards overlap a full-bleed photograph",
+          colors: ["#F2EDE4", "#24483c"],
         },
       },
     ],
@@ -118,6 +121,8 @@ test("private upload commits only complete references; anonymous retrieval exclu
   ).json();
   assert.equal(result.references.length, 1);
   assert.equal(result.references[0].reviewed, true);
+  assert.equal(result.references[0].signature, "Cards overlap a full-bleed photograph");
+  assert.deepEqual(result.references[0].colors, ["#f2ede4", "#24483c"]);
   assert.equal(result.coverage[0].reviewed, true);
   assert(
     !/PRIVATE|secret|12345|sha256|https:|v1\/objects|note/.test(
@@ -146,6 +151,10 @@ test("content addressing, type checks, immutable references and bounded inputs",
     (await call(`/admin/objects/${"0".repeat(64)}`, "PUT", bytes)).status,
     400,
   );
+  const badColors = structuredClone(ref);
+  badColors.images[0].observation.colors = ["blue"];
+  await call(`/admin/objects/${sha256}`, "PUT", bytes);
+  assert.equal((await call("/admin/references", "POST", badColors)).status, 400);
   assert.equal(
     (
       await call(`/admin/objects/${sha256}`, "PUT", bytes, true, {

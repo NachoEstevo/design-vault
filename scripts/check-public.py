@@ -7,7 +7,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 ROOT_FILES = {"README.md", "LICENSE", "CONTRIBUTING.md", ".gitignore", ".gitattributes",
               "package.json", "package-lock.json"}
-DIRECTORIES = {"skills", "extension", "scripts", "tests", "docs", "templates", ".github", "bin", "service"}
+DIRECTORIES = {"skills", "extension", "scripts", "tests", "docs", "templates", ".github", "bin", "service", "site"}
 PRIVATE_NAMES = {"vault.json", "reference.json", "note.md", ".pending.json", "rclone.conf", ".npmrc"}
 PRIVATE_PARTS = {"_design-vault", "node_modules", "output", "__pycache__", "private", "data", "vault", ".wrangler"}
 FORBIDDEN_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".zip", ".sqlite", ".db", ".pem", ".key"}

@@ -43,6 +43,17 @@ export function observation(value) {
     );
   for (const key of ["typography", "uncertainty"])
     result[key] = publicText(value[key] || "", 600, key, true);
+  for (const [key, max] of [["layout", 600], ["signature", 400], ["recipe", 1200]])
+    if (value[key] != null) result[key] = publicText(value[key], max, key, true);
+  if (value.colors != null) {
+    fail(
+      !Array.isArray(value.colors) ||
+        value.colors.length > 8 ||
+        !value.colors.every((c) => typeof c === "string" && /^#[0-9a-f]{6}$/i.test(c)),
+      "Invalid colors",
+    );
+    result.colors = value.colors.map((c) => c.toLowerCase());
+  }
   return result;
 }
 export function reference(value) {

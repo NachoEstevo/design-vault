@@ -131,6 +131,10 @@ export async function retrieve(references, brief) {
       palette: visual?.palette || [],
       components: visual?.components || [],
       typography: visual?.typography || "",
+      layout: visual?.layout || "",
+      signature: visual?.signature || "",
+      recipe: visual?.recipe || "",
+      colors: visual?.colors || [],
       uncertainty:
         visual?.uncertainty ||
         "Original pixels are not provided to this client.",
