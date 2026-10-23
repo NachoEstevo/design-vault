@@ -6,6 +6,7 @@ import {
   setFolder,
   useDownloads,
 } from "./core/capture-service.js";
+import { cloud } from "./core/cloud.js";
 chrome.runtime.onMessage.addListener((message, sender, respond) => {
   const own = sender.id === chrome.runtime.id;
   let page = false,
@@ -25,6 +26,10 @@ chrome.runtime.onMessage.addListener((message, sender, respond) => {
     RETRY_PENDING: () => retryPending(),
     SET_FOLDER: () => setFolder(message.candidateKey),
     USE_DOWNLOADS: () => useDownloads(),
+    CLOUD_STATUS: () => cloud.state(),
+    CLOUD_CONNECT: () => cloud.connect(message.config),
+    CLOUD_DISCONNECT: () => cloud.disconnect(),
+    CLOUD_SYNC: () => cloud.sync(),
     OPEN_LIBRARY: () =>
       chrome.tabs
         .create({ url: chrome.runtime.getURL("library.html") })

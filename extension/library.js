@@ -1,5 +1,6 @@
 import { getSetting, setSetting, getEntries } from "./core/db.js";
 import { readLibrary } from "./core/files.js";
+import { cloudConfig } from "./core/cloud.js";
 
 const $ = (id) => document.getElementById(id);
 let folder = null;
@@ -194,16 +195,17 @@ async function refresh() {
       : "Connect folder ";
     const downloads = settings.folder?.mode === "downloads";
     $("use-downloads").hidden = downloads;
-    $("choose-folder").hidden = downloads && typeof window.showDirectoryPicker !== "function";
+    $("choose-folder").hidden =
+      downloads && typeof window.showDirectoryPicker !== "function";
     $("renew-permission").hidden =
       !folder || settings.folder?.permission === "granted";
     $("folder-help").textContent = downloads
       ? "Images and notes are saved in Downloads/Design Shelf. Sync that folder with Drive if needed. The gallery uses a private browser copy."
       : !folder
-      ? "A folder you control. Optionally sync it with Drive for desktop."
-      : settings.folder?.permission !== "granted"
-        ? "Renew folder access to read and save references."
-        : "Files are saved here. Drive for desktop can sync this folder.";
+        ? "A folder you control. Optionally sync it with Drive for desktop."
+        : settings.folder?.permission !== "granted"
+          ? "Renew folder access to read and save references."
+          : "Files are saved here. Drive for desktop can sync this folder.";
     const entries = await getEntries();
     const pending = entries.filter((entry) => entry.status === "pending");
     $("pending-panel").hidden = pending.length === 0;
@@ -220,10 +222,13 @@ async function refresh() {
       const library = await readLibrary(folder);
       // An export can fail after the private copy was written. Show that entry
       // in pending, not as a successfully saved reference in the gallery.
-      const pendingIds = new Set(pending.map(entry => entry.postId));
-      items = settings.folder?.mode === "downloads"
-        ? library.items.filter(item => !pendingIds.has(item.reference.postId))
-        : library.items;
+      const pendingIds = new Set(pending.map((entry) => entry.postId));
+      items =
+        settings.folder?.mode === "downloads"
+          ? library.items.filter(
+              (item) => !pendingIds.has(item.reference.postId),
+            )
+          : library.items;
       warnings = library.warnings;
       items.sort((a, b) =>
         b.reference.capturedAt.localeCompare(a.reference.capturedAt),
@@ -246,14 +251,14 @@ async function refresh() {
 
 $("choose-folder").addEventListener("click", async () => {
   if (typeof window.showDirectoryPicker !== "function") {
-    status("This browser cannot select a folder. Choose Use Downloads to save in Downloads/Design Shelf.", true);
+    status(
+      "This browser cannot select a folder. Choose Use Downloads to save in Downloads/Design Shelf.",
+      true,
+    );
     return;
   }
   if (settings.pendingCount > 0) {
-    status(
-      "Retry pending saves before switching folders.",
-      true,
-    );
+    status("Retry pending saves before switching folders.", true);
     return;
   }
   let candidateKey;
@@ -340,4 +345,94 @@ window.addEventListener("pagehide", () => {
   revoke(galleryUrls);
   revoke(detailUrls);
 });
+function renderCloud(value) {
+  $("cloud-state").textContent = value.connected
+    ? `${value.saved} synced from this browser${value.failed ? ` · ${value.failed} to retry` : ""}`
+    : "Local only";
+  $("cloud-sync").hidden = $("cloud-disconnect").hidden = !value.connected;
+  $("cloud-form").hidden = value.connected;
+  $("cloud-edit").hidden = !value.connected;
+  if (value.connected) $("cloud-url").value = value.service_url;
+  $("cloud-help").textContent = value.connected
+    ? `Connected to ${value.service_url}. Local originals stay available if an upload fails.`
+    : "Reading the shared skill needs no token. Connect your own service to upload references.";
+}
+$("cloud-edit").addEventListener("click", () => {
+  $("cloud-form").hidden = !$("cloud-form").hidden;
+});
+$("cloud-import").addEventListener("change", async (event) => {
+  try {
+    const file = event.target.files[0];
+    if (!file || file.size > 8192)
+      throw new Error("Choose a small owner configuration JSON file");
+    const config = cloudConfig(JSON.parse(await file.text()));
+    $("cloud-url").value = config.service_url;
+    $("cloud-token").value = config.upload_token;
+    status(
+      "Owner config loaded. Connect to verify access and allow this service.",
+    );
+  } catch {
+    status("Invalid owner configuration file", true);
+  }
+  event.target.value = "";
+});
+$("cloud-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const button = event.submitter;
+  try {
+    const config = cloudConfig({
+      service_url: $("cloud-url").value,
+      upload_token: $("cloud-token").value,
+    });
+    // Request only the configured origin, directly from the owner's click.
+    if (
+      !(await chrome.permissions.request({
+        origins: [`${config.service_url}/*`],
+      }))
+    )
+      throw new Error("Service access was not granted");
+    button.disabled = true;
+    renderCloud(await message("CLOUD_CONNECT", { config }));
+    $("cloud-token").value = "";
+    status(
+      "Cloud vault connected. Sync existing references, or save a new one on X.",
+    );
+  } catch (error) {
+    status(error.message, true);
+  } finally {
+    button.disabled = false;
+  }
+});
+$("cloud-sync").addEventListener("click", async () => {
+  $("cloud-sync").disabled = true;
+  status("Syncing saved references. Keep this page open…");
+  try {
+    const value = await message("CLOUD_SYNC");
+    renderCloud(value);
+    status(
+      value.failed
+        ? `${value.failed} uploads need a retry. Local originals are safe.`
+        : "All saved references synced to your private bucket.",
+      value.failed > 0,
+    );
+  } catch (error) {
+    status(error.message, true);
+  } finally {
+    $("cloud-sync").disabled = false;
+  }
+});
+$("cloud-disconnect").addEventListener("click", async () => {
+  try {
+    renderCloud(await message("CLOUD_DISCONNECT"));
+    $("cloud-token").value = "";
+    status(
+      "Cloud disconnected. Your local library and bucket files are preserved.",
+    );
+  } catch (error) {
+    status(error.message, true);
+  }
+});
+message("CLOUD_STATUS")
+  .then(renderCloud)
+  .catch((error) => status(error.message, true));
 refresh();

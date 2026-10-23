@@ -40,4 +40,9 @@ test("authenticated X can add categories, untrusted senders cannot", async () =>
     { id: "test-extension", url: "https://x.com/home" },
   );
   assert.equal(downloads.error.code, "INVALID_MESSAGE");
+  for (const type of ["CLOUD_STATUS", "CLOUD_CONNECT", "CLOUD_DISCONNECT", "CLOUD_SYNC"]) {
+    const result = await dispatch({type,config:{upload_token:"should-never-be-used"}},
+      {id:"test-extension",url:"https://x.com/home"});
+    assert.equal(result.error.code,"INVALID_MESSAGE");
+  }
 });

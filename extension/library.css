@@ -12,7 +12,7 @@ button.primary:hover, a.primary:hover { background: #173a2e; }
 :focus-visible { outline: 3px solid #87aa96; outline-offset: 3px; }
 .masthead, main { width: min(1360px, calc(100% - 80px)); margin-inline: auto; }
 .masthead { height: 86px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
-.brand { font-size: 19px; font-weight: 700; letter-spacing: -.7px; }
+.brand { display:inline-flex;align-items:center;gap:10px;font-size: 19px; font-weight: 700; letter-spacing: -.7px; }
 .help-link { color: var(--muted); padding: 10px 0 10px 16px; }
 .help-link:hover, footer a:hover { text-decoration: underline; }
 .intro { padding-top: 46px; }
@@ -76,3 +76,16 @@ dialog::backdrop { background: #14251db0; }
 @media (max-width: 640px) { .masthead, main { width: calc(100% - 32px); } .masthead { height: 68px; } .intro { padding-top: 30px; } .folder-panel { padding: 18px; margin-top: 22px; } .folder-actions { width: 100%; } .collection { grid-template-columns: minmax(0, 1fr); gap: 16px; } .collection-label { padding-left: 0; padding-bottom: 8px; } #categories { display: flex; overflow-x: auto; padding: 3px 0 8px; } #categories button { flex-shrink: 0; } .gallery { gap: 12px; } .reference-info { padding: 12px; } .pending-panel { padding: 18px; grid-template-columns: 1fr; } .pending-panel ul { grid-column: auto; } .toolbar { gap: 8px; } dialog { padding: 22px; } footer { gap: 16px; } }
 @media (max-width: 380px) { .gallery { grid-template-columns: minmax(0, 1fr); } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; } }
+.cloud-panel {border:1px solid var(--border, #deded8);border-radius:12px;padding:20px 24px;margin-bottom:32px;background:var(--panel, #fafaf7)}
+.cloud-panel summary {cursor:pointer;font-weight:600;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.cloud-panel summary span {font-size:12px;font-weight:400;color:#6a7069}
+.cloud-panel p {font-size:13px;line-height:1.6;color:#636a63;max-width:80ch}
+.cloud-panel form {display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0}
+.cloud-panel label {font-size:12px;display:grid;gap:8px}
+.cloud-panel input {width:100%;min-width:0;padding:12px;border:1px solid #d5dad2;border-radius:7px;background:#fff;color:#23362c}
+.cloud-actions {display:flex;align-items:center;flex-wrap:wrap;gap:12px;grid-column:1/-1}
+.cloud-panel .import-config {cursor:pointer;border:1px solid #d5dad2;border-radius:7px;padding:11px 14px;display:block;font-size:13px}
+.import-config {position:relative}
+.import-config input {position:absolute;width:1px;height:1px;padding:0;border:0;overflow:hidden;clip-path:inset(50%)}
+.import-config:focus-within {outline:3px solid #87aa96;outline-offset:3px}
+@media(max-width:700px){.cloud-panel form{grid-template-columns:1fr}.cloud-panel{padding:18px}}

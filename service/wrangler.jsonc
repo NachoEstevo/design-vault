@@ -1,0 +1,10 @@
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "design-vault",
+  "main": "worker.js",
+  "compatibility_date": "2026-10-23",
+  "workers_dev": true,
+  "r2_buckets": [{ "binding": "VAULT", "bucket_name": "design-vault" }],
+  "ratelimits": [{ "name": "READER_LIMIT", "namespace_id": "1042", "simple": { "limit": 30, "period": 60 } }],
+  "observability": { "enabled": false }
+}

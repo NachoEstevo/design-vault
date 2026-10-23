@@ -7,10 +7,11 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 ROOT_FILES = {"README.md", "LICENSE", "CONTRIBUTING.md", ".gitignore", ".gitattributes",
               "package.json", "package-lock.json"}
-DIRECTORIES = {"skills", "extension", "scripts", "tests", "docs", "templates", ".github", "bin"}
+DIRECTORIES = {"skills", "extension", "scripts", "tests", "docs", "templates", ".github", "bin", "service"}
 PRIVATE_NAMES = {"vault.json", "reference.json", "note.md", ".pending.json", "rclone.conf", ".npmrc"}
-PRIVATE_PARTS = {"_design-vault", "node_modules", "output", "__pycache__", "private", "data", "vault"}
+PRIVATE_PARTS = {"_design-vault", "node_modules", "output", "__pycache__", "private", "data", "vault", ".wrangler"}
 FORBIDDEN_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".zip", ".sqlite", ".db", ".pem", ".key"}
+OWN_ICONS = {f"extension/icons/icon-{size}.png" for size in (16,32,48,128)}
 PATTERNS = [
     re.compile(r"(?:gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{30,})"),
     re.compile(r"AKIA[A-Z0-9]{16}"),
@@ -30,11 +31,15 @@ def main():
         file = ROOT / relative
         if (path.parts[0] not in DIRECTORIES and relative not in ROOT_FILES
                 or path.name in PRIVATE_NAMES or set(path.parts) & PRIVATE_PARTS
-                or path.suffix.lower() in FORBIDDEN_EXTENSIONS or path.name.startswith(".env")):
+                or (path.suffix.lower() in FORBIDDEN_EXTENSIONS and relative not in OWN_ICONS) or path.name.startswith((".env", ".dev.vars", "wrangler.local."))):
             errors.append(f"File outside the allowed public surface: {relative}")
             continue
         if file.is_symlink() or file.stat().st_size > 500_000:
             errors.append(f"Unreviewed symlink or large file: {relative}")
+            continue
+        if relative in OWN_ICONS:
+            if not file.read_bytes().startswith(b"\x89PNG\r\n\x1a\n"):
+                errors.append(f"Invalid packaged icon: {relative}")
             continue
         try:
             content = file.read_text(encoding="utf-8")
@@ -46,7 +51,7 @@ def main():
     if errors:
         print("\n".join(errors), file=sys.stderr)
         return 1
-    print(f"{len(paths)} files checked; no libraries, personal configuration, binaries, or recognized secrets.")
+    print(f"{len(paths)} files checked; no libraries, personal configuration, unapproved binaries, or recognized secrets.")
     return 0
 
 

@@ -73,6 +73,10 @@ try {
   const library = await context.newPage();
   await library.goto(`chrome-extension://${id}/library.html`);
   await library.getByRole("button", { name: "Connect folder" }).waitFor();
+  await library.locator("summary").click();
+  await library.getByRole("button", { name: "Connect cloud vault" }).waitFor();
+  await library.screenshot({path:join(output,"library-cloud.png"),fullPage:true});
+  await library.locator("summary").click();
   await library.screenshot({
     path: join(output, "library-empty.png"),
     fullPage: true,

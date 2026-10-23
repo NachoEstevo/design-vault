@@ -1,19 +1,21 @@
 {
   "name": "@nachoestevo/design-vault",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": false,
   "type": "module",
   "scripts": {
     "test": "node --test tests/*.test.js",
     "test:browser": "node tests/browser.mjs",
+    "test:service": "node tests/service-integration.mjs",
     "check": "node scripts/check.mjs",
     "test:vault": "python -m unittest discover -s tests -p test_*.py -v",
     "check:public": "python scripts/check-public.py"
   },
   "devDependencies": {
-    "playwright": "^1.64.0"
+    "playwright": "^1.64.0",
+    "wrangler": "4.152.0"
   },
-  "description": "Agent skill for designing with a private, local inspiration library",
+  "description": "Design with curated reference descriptions or your own private inspiration library",
   "license": "MIT",
   "author": "NachoEstevo",
   "engines": {

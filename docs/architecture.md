@@ -1,9 +1,10 @@
 # Architecture
 
-## Three responsibilities
+## Responsibilities
 
 - **Design Shelf:** detects likes, presents the capture modal, and writes local files. Downloads mode uses `chrome.downloads`; folder mode uses browser directory handles. Browser-private storage also preserves the recovery queue.
 - **Design Vault:** reads `reference.json`, builds a local SQLite index, and retrieves references. Search does not modify originals. `describe` writes separate observations into `_design-vault/descriptions`.
+- **Private service:** authenticates owner uploads, stores originals and a private catalog in R2, and exposes bounded anonymous descriptions. It never calls an inference API. See [private-cloud.md](private-cloud.md).
 - **The agent:** interprets the brief, views a few images, chooses what to apply, builds the design, and reviews the result. The script does not perform vision or generate a website by itself.
 
 ## Library contract
@@ -37,6 +38,4 @@ Root precedence: `--root` argument → `DESIGN_VAULT_ROOT` environment variable 
 
 The installer writes configuration to the installed skill, outside the public checkout. Existing installations are never replaced. To update, review changes and preserve your configuration and preferences before copying the new version.
 
-There is no backend, remote database, Google authentication, automatic R2 sync, or bundled public library.
-
-The next cloud architecture is defined separately in [private-cloud.md](private-cloud.md). It supports a hosted inspiration service and bring-your-own private deployments, while distinguishing actual original-image privacy from simply hiding previews in a UI.
+The default skill configuration selects a hosted description service. Local mode is explicit through `vault_root`; it retains direct original inspection. The hosted client stores bounded responses outside the repository, keyed by service, exact query and project session. See [private-cloud.md](private-cloud.md) for the service contract and setup. No Google authentication or provider inference key is needed.

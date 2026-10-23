@@ -6,12 +6,14 @@ import {
 } from "./reference.js";
 import { writeReference as writer, readLibrary } from "./files.js";
 import { exportReferenceDownloads } from "./downloads.js";
+import { cloud } from "./cloud.js";
 export function createCaptureService({
   db = database,
   writeReference = writer,
   fetcher = globalThis.fetch,
   exportDownloads = exportReferenceDownloads,
   privateDirectory = () => navigator.storage.getDirectory(),
+  syncCloud = postId => cloud.sync(postId),
 } = {}) {
   let tail = Promise.resolve();
   const serial = (fn) => {
@@ -68,6 +70,8 @@ export function createCaptureService({
         status: "saved",
         error: undefined,
       });
+      // Upload errors must never turn a completed local save into a failed capture.
+      await syncCloud(entry.postId).catch(() => {});
       return { status: "saved", reference };
     } catch (error) {
       if (error.code === "DUPLICATE") {

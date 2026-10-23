@@ -54,3 +54,9 @@ Drive for desktop synchronizes files independently; opening Drive in a browser d
 Manifest V3; `storage` and `downloads` permissions; content scripts on X/Twitter and image access to `pbs.twimg.com`. No backend, telemetry, or remotely executed code is included.
 
 Automated tests use a synthetic feed, controlled PNG responses, and genuine OPFS directory handles. They cover queues, files, gallery, skip, duplicates, renamed downloads, and worker recovery. They do **not** verify native external-folder selection, authenticated live X DOM, real X images, or actual Drive/R2 synchronization.
+
+## Optional private cloud sync
+
+Open **Cloud vault**, import your private owner JSON configuration or enter the HTTPS service URL and owner upload token, then connect. Grant access only to your service origin. **Sync saved references** uploads existing local references; subsequent captures upload after a successful local save. A failed upload leaves local files untouched and can be retried. Disconnect preserves local files and remote objects.
+
+The hosted reading skill needs no extension or token. It receives descriptions and tags. New images remain metadata-only until the owner reviews a few originals with their own Codex/Claude and synchronizes those observations. See [private cloud setup](private-cloud.md).

@@ -4,12 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Design Shelf · Library</title>
+    <link rel="icon" href="icons/icon-32.png" />
     <link rel="stylesheet" href="library.css" />
     <script type="module" src="library.js"></script>
   </head>
   <body>
     <header class="masthead">
-      <a class="brand" href="library.html" aria-label="Design Shelf library">Design Shelf</a>
+      <a class="brand" href="library.html" aria-label="Design Shelf library"><img src="icons/shelf.svg" width="32" height="32" alt="" />Design Shelf</a>
       <a class="help-link" href="https://github.com/NachoEstevo/design-vault/blob/main/docs/capture.md" target="_blank" rel="noopener noreferrer">Help</a>
     </header>
     <main>
@@ -32,6 +33,18 @@
         </div>
       </section>
       <p id="status" class="status" role="status" aria-live="polite"></p>
+      <details class="cloud-panel">
+        <summary>Cloud vault <span id="cloud-state">Local only</span></summary>
+        <p>Keep originals in your private R2 bucket. The skill receives selected descriptions and tags, never the original files.</p>
+        <form id="cloud-form">
+          <label>Service URL<input id="cloud-url" type="url" placeholder="https://your-vault.workers.dev" required autocomplete="url" /></label>
+          <label>Owner upload token<input id="cloud-token" type="password" required autocomplete="off" placeholder="Only needed to upload your own library" /></label>
+          <div class="cloud-actions"><button class="primary" type="submit">Connect cloud vault</button><label class="import-config">Import owner config<input id="cloud-import" type="file" accept="application/json,.json" /></label></div>
+        </form>
+        <div class="cloud-actions"><button id="cloud-sync" hidden>Sync saved references</button><button id="cloud-edit" class="quiet" hidden>Change connection</button><button id="cloud-disconnect" class="quiet" hidden>Disconnect</button></div>
+        <p id="cloud-help">Use your own service and bucket to collect references. Reading the shared skill needs no token.</p>
+        <p>New saves sync as metadata until you review their images with your own Codex or Claude. No paid AI API runs here.</p>
+      </details>
       <section id="pending-panel" class="pending-panel" hidden aria-labelledby="pending-heading">
         <div><h2 id="pending-heading">Pending saves</h2><p>Retry to finish saving these references.</p></div>
         <button id="retry-pending">Retry saves</button>

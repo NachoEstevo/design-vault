@@ -7,9 +7,12 @@ const manifest = JSON.parse(await readFile("extension/manifest.json", "utf8"));
 assert.equal(manifest.manifest_version, 3);
 assert.deepEqual(manifest.permissions, ["storage", "downloads"]);
 assert.deepEqual(manifest.host_permissions, ["https://pbs.twimg.com/*"]);
+assert.deepEqual(manifest.optional_host_permissions, ["https://*/*"]);
 for (const file of [
   manifest.background.service_worker,
   manifest.options_page,
+  ...Object.values(manifest.icons),
+  ...Object.values(manifest.action.default_icon),
   ...manifest.content_scripts.flatMap((s) => s.js),
   ...manifest.web_accessible_resources.flatMap((r) => r.resources),
 ])
@@ -31,6 +34,7 @@ async function check(dir) {
 await check("extension");
 await check("scripts");
 await check("bin");
+await check("service");
 await check("tests");
 const html = await readFile("extension/library.html", "utf8");
 assert(!/\bon\w+=/i.test(html), "No inline handlers allowed by extension CSP");

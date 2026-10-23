@@ -180,7 +180,7 @@ class Catalog:
                 images = self.reference_images(path, value)
                 post_id = images[0]["post_id"]
                 if post_id in posts:
-                    raise ValueError("ID de post duplicado en la biblioteca")
+                    raise ValueError("Duplicate post ID in the library")
                 posts.add(post_id)
                 for image in images:
                     observation = self.observation_path(image["id"])

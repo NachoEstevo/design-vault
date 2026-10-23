@@ -16,9 +16,9 @@ On another machine, originals must be available locally. Neither the extension n
 
 ## Private R2
 
-For the planned hosted reader and self-hosted cloud mode, see [private inspiration service](private-cloud.md). Keeping original images private while serving anyone requires server-side visual interpretation; a bucket URL or a hidden client-side image is insufficient.
+The extension can upload saved originals and metadata through an owner-authenticated Worker. The shared skill receives selected descriptions and tags; it cannot download originals. Use [the service setup guide](private-cloud.md) to deploy your own private vault or import an existing library. No AI API runs in the service.
 
-R2 can store a private backup. It does not create a local folder or change retrieval: **this skill version does not consume remote objects**. Download a local copy and point the skill at it before designing on another machine.
+The native service stores immutable images under `v1/objects/` and a private catalog under `v1/private/`. This is separate from an optional file-preserving backup: native objects alone are not a drop-in local folder export. Keep your original Design Shelf folder for recovery.
 
 - Keep the public `r2.dev` URL disabled and do not connect a public domain to a personal bucket.
 - `https://<ACCOUNT_ID>.r2.cloudflarestorage.com` is an authenticated S3 API endpoint; specify the bucket separately. It is not a public image URL.
@@ -42,6 +42,6 @@ rclone copy "vault-r2:design-vault/library" "/path/to/restored-vault" --dry-run
 
 Review and rerun without `--dry-run`. Preserve directories and filenames. Reference and description JSON remain private even when the original posts are public. Do not upload the machine's reconstructible cache.
 
-This repo contains no real account ID, personal endpoint, token, profile, or credentials. Presigned URLs grant temporary object access; do not commit them as permanent references.
+This repo includes the public description-service address, but no account ID, upload token, private object endpoint, profile or credentials. Presigned URLs grant temporary object access; do not commit them as permanent references.
 
 Sources: [R2 S3 API](https://developers.cloudflare.com/r2/api/s3/api/), [public buckets](https://developers.cloudflare.com/r2/buckets/public-buckets/), and [rclone with R2](https://developers.cloudflare.com/r2/examples/rclone/).

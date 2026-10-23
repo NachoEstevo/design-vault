@@ -154,3 +154,14 @@ test("downloads setup cannot move pending work from an external folder", async (
   await assert.rejects(service.useDownloads(), /pending/);
   assert.equal(await store.getSetting("folderToken"), "one");
 });
+
+test("cloud upload failure cannot undo a completed local capture",async()=>{
+  const store=db();await store.setSetting("folder",directory());await store.setSetting("folderToken","one");
+  let statusAtUpload;
+  const service=createCaptureService({db:store,writeReference:async(root,entry)=>entry.reference,
+    syncCloud:async postId=>{statusAtUpload=(await store.getEntry(postId)).status;throw new Error("Cloud offline");}});
+  const result=await service.saveReference(input);
+  assert.equal(result.status,"saved");
+  assert.equal(statusAtUpload,"saved");
+  assert.equal((await store.getEntries())[0].status,"saved");
+});

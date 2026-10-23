@@ -26,3 +26,6 @@ rclone.conf
 .npmrc
 .DS_Store
 Thumbs.db
+.wrangler/
+.dev.vars*
+wrangler.local.*

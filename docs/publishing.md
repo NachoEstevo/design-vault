@@ -1,6 +1,6 @@
 # Publishing to npm
 
-The public repository and npm registry are separate publications. The package is prepared as `@nachoestevo/design-vault`, version `0.1.0`, but pushing does not publish it. There are no npm tokens or automatic publishing workflows in this repo.
+The public repository and npm registry are separate publications. The package is prepared as `@nachoestevo/design-vault`, version `0.2.0`, but pushing does not publish it. There are no npm tokens or automatic publishing workflows in this repo.
 
 Direct GitHub installation already works without registry publication: `npx --yes --package=github:NachoEstevo/design-vault design-vault --vault-root "/path/to/Design Shelf"`. Pin a reviewed commit/tag for reproducible installation. Both GitHub and tarball installs use the same Python installer.
 
@@ -23,13 +23,13 @@ Create `output` if needed, then build and test a local package:
 
 ```sh
 npm pack --pack-destination output
-npm exec --yes --package=./output/nachoestevo-design-vault-0.1.0.tgz -- design-vault --help
+npm exec --yes --package=./output/nachoestevo-design-vault-0.2.0.tgz -- design-vault --help
 ```
 
 Test an actual installation using an existing synthetic library and a temporary skills directory, separate from your regular installation:
 
 ```sh
-npm exec --yes --package=./output/nachoestevo-design-vault-0.1.0.tgz -- design-vault --vault-root "/path/to/test-vault" --skills-root "/path/to/test-skills"
+npm exec --yes --package=./output/nachoestevo-design-vault-0.2.0.tgz -- design-vault --vault-root "/path/to/test-vault" --skills-root "/path/to/test-skills"
 ```
 
 A repeat installation must fail while preserving configuration. `DESIGN_VAULT_PYTHON` can point to a specific Python executable when PATH discovery is insufficient.

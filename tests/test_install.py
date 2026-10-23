@@ -42,6 +42,19 @@ class InstallationTests(unittest.TestCase):
             installer.install(self.vault / "missing", self.skills)
         self.assertFalse(self.skills.exists())
 
+    def test_hosted_default_needs_no_local_library_or_credential(self):
+        target = installer.install(skills_root=self.skills)
+        config = json.loads((target / "vault.json").read_text(encoding="utf-8"))
+        self.assertEqual(config["service_url"], "https://design-vault.nachoestevo.workers.dev")
+        self.assertNotIn("vault_root", config)
+        self.assertNotIn("token", json.dumps(config))
+        self.assertTrue((target / "scripts" / "remote.py").is_file())
+
+    def test_rejects_unsafe_self_hosted_service_before_installing(self):
+        with self.assertRaises(ValueError):
+            installer.install(skills_root=self.skills, service="http://unsafe.test")
+        self.assertFalse(self.skills.exists())
+
     def test_respects_codex_home_and_installed_cli_works(self):
         with patch.dict(os.environ, {"CODEX_HOME": str(self.base / "codex")}, clear=False):
             target = installer.install(self.vault)
