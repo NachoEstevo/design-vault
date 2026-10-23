@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Design Shelf · Tu biblioteca</title>
+    <link rel="stylesheet" href="library.css" />
+    <script type="module" src="library.js"></script>
+  </head>
+  <body>
+    <header class="masthead">
+      <a class="brand" href="library.html" aria-label="Design Shelf, biblioteca"
+        ><span class="brand-mark" aria-hidden="true">ds.</span
+        ><span>Design Shelf<small>TU ARCHIVO VISUAL</small></span></a
+      >
+      <span class="local-badge"
+        ><i aria-hidden="true"></i> Vive en tu carpeta</span
+      >
+    </header>
+    <main>
+      <section class="intro">
+        <div>
+          <p class="eyebrow">BUEN DISEÑO, A MANO.</p>
+          <h1>Un lugar para<br />lo que te inspira<span>.</span></h1>
+          <p class="intro-copy">
+            Guardá lo que te llama la atención.<br />Recordá por qué te gustó.
+          </p>
+        </div>
+        <div class="folder-panel">
+          <span class="panel-label">TU BIBLIOTECA</span
+          ><strong id="folder-name">Elegí dónde guardarla</strong>
+          <p id="folder-help">
+            Una carpeta tuya. Podés sincronizarla con Google Drive para
+            escritorio.
+          </p>
+          <div class="folder-actions">
+            <button id="choose-folder" class="primary">
+              Conectar carpeta <span aria-hidden="true">↗</span></button
+            ><button id="renew-permission" hidden>Renovar acceso</button>
+            <button id="use-downloads">Usar Descargas</button>
+          </div>
+        </div>
+      </section>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+      <section
+        id="pending-panel"
+        class="pending-panel"
+        hidden
+        aria-labelledby="pending-heading"
+      >
+        <div>
+          <h2 id="pending-heading">Referencias pendientes</h2>
+          <p>Se guardarán en la carpeta conectada cuando reintentes.</p>
+        </div>
+        <button id="retry-pending">Reintentar guardados</button>
+        <ul id="pending-list"></ul>
+      </section>
+      <section class="collection" aria-labelledby="collection-heading">
+        <aside>
+          <div class="collection-label">
+            <h2 id="collection-heading">Colección</h2>
+            <span id="total-count">0</span>
+          </div>
+          <nav id="categories" aria-label="Filtrar por categoría"></nav>
+        </aside>
+        <div class="collection-body">
+          <div class="toolbar">
+            <label class="search"
+              ><span aria-hidden="true">⌕</span
+              ><input
+                type="search"
+                id="search"
+                placeholder="Buscar notas, etiquetas, autores…"
+                aria-label="Buscar referencias" /></label
+            ><button
+              id="refresh"
+              class="quiet"
+              title="Volver a leer la carpeta"
+            >
+              Actualizar ↻
+            </button>
+          </div>
+          <p id="results-label" class="results-label"></p>
+          <div id="gallery" class="gallery"></div>
+          <div id="empty" class="empty">
+            <div class="empty-art" aria-hidden="true">
+              <span class="sample-card"><i></i><i></i><i></i></span
+              ><span class="sample-swatch"></span
+              ><span class="sample-note"
+                >Una buena idea<br />empieza mirando.</span
+              >
+            </div>
+            <h3>Tu próxima idea empieza acá.</h3>
+            <p id="empty-help">
+              Conectá una carpeta, abrí X y dale like a un post con imágenes.
+            </p>
+            <a
+              href="https://x.com/home"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Abrir X <span aria-hidden="true">↗</span></a
+            >
+          </div>
+          <button id="load-more" class="quiet" hidden>Mostrar más</button>
+        </div>
+      </section>
+      <footer>
+        <span>Referencias con contexto. Ideas con intención.</span
+        ><span>Design Shelf / 01</span>
+      </footer>
+    </main>
+    <dialog id="details" aria-labelledby="detail-heading">
+      <button id="close-details" class="close" aria-label="Cerrar referencia">
+        ×
+      </button>
+      <p id="detail-category" class="eyebrow"></p>
+      <h2 id="detail-heading"></h2>
+      <p id="detail-note"></p>
+      <div id="detail-tags" class="tags"></div>
+      <div id="detail-images" class="detail-images"></div>
+      <p id="detail-meta" class="detail-meta"></p>
+      <a
+        id="detail-link"
+        class="primary"
+        target="_blank"
+        rel="noopener noreferrer"
+        >Ver post original ↗</a
+      >
+    </dialog>
+  </body>
+</html>

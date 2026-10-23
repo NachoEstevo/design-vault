@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>X fixture · Design Shelf</title>
+    <style>
+      body {
+        background: #101414;
+        color: #f4f4ed;
+        font: 16px system-ui;
+        margin: 0;
+        padding: 50px;
+      }
+      main {
+        max-width: 600px;
+        margin: auto;
+      }
+      article {
+        padding: 24px;
+        background: #1c2320;
+        border-radius: 14px;
+        margin: 20px 0;
+      }
+      img {
+        width: 100%;
+        max-height: 230px;
+        object-fit: cover;
+        border-radius: 12px;
+      }
+      button {
+        margin: 15px 0;
+        padding: 10px 20px;
+        background: #dbedac;
+        border: 0;
+        border-radius: 8px;
+        color: #222;
+      }
+      a {
+        color: #becfb0;
+      }
+      blockquote {
+        padding: 10px;
+        background: #2b332d;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Feed de prueba</h1>
+      <article data-testid="tweet" id="primary">
+        <div data-testid="User-Name">
+          <a href="/designer"><span>Designer</span></a
+          ><span>@designer</span>
+        </div>
+        <a href="/designer/status/12345678901"
+          ><time datetime="2026-10-09T12:00:00Z">Oct 9</time></a
+        >
+        <div data-testid="tweetText">
+          Una referencia de composición para mi próximo dashboard.
+        </div>
+        <div data-testid="tweetPhoto">
+          <img
+            alt="Card de diseño de prueba"
+            src="https://pbs.twimg.com/media/TestShelfOne?format=png&name=small"
+          />
+        </div>
+        <blockquote role="link" data-testid="quoteTweet">
+          <a href="/quoted/status/99999999999"><time>Oct 8</time></a>
+          <div data-testid="tweetText">Esta imagen es del post citado.</div>
+          <div data-testid="tweetPhoto">
+            <img
+              alt="Imagen citada, no guardar"
+              src="https://pbs.twimg.com/media/QuotedShelf?format=png&name=small"
+            />
+          </div>
+        </blockquote>
+        <div role="group">
+          <button data-testid="like" aria-label="Me gusta" type="button">
+            ♡ Like
+          </button>
+        </div>
+      </article>
+      <article data-testid="tweet" id="secondary">
+        <div data-testid="User-Name">@second</div>
+        <a href="/second/status/22345678901"><time>Oct 9</time></a>
+        <div data-testid="tweetText">Otra card.</div>
+        <div data-testid="tweetPhoto">
+          <img
+            alt="Segunda card"
+            src="https://pbs.twimg.com/media/TestShelfTwo?format=png&name=small"
+          />
+        </div>
+        <div role="group">
+          <button data-testid="like" aria-label="Me gusta" type="button">
+            ♡ Like
+          </button>
+        </div>
+      </article>
+      <article data-testid="tweet" id="text-only">
+        <div data-testid="User-Name">@text</div>
+        <a href="/text/status/32345678901"><time>Oct 9</time></a>
+        <div data-testid="tweetText">Un post sin imágenes.</div>
+        <div role="group">
+          <button data-testid="like" aria-label="Me gusta" type="button">
+            ♡ Like
+          </button>
+        </div>
+      </article>
+    </main>
+    <script>
+      document.addEventListener("click", (event) => {
+        const button = event.target.closest("button[data-testid]");
+        if (!button) return;
+        const liked = button.dataset.testid === "like";
+        setTimeout(() => {
+          if (button.dataset.fixtureNoConfirm) return;
+          button.dataset.testid = liked ? "unlike" : "like";
+          button.textContent = liked ? "♥ Liked" : "♡ Like";
+          button.setAttribute(
+            "aria-label",
+            liked ? "Ya no me gusta" : "Me gusta",
+          );
+          if (button.dataset.fixtureRerender) {
+            const article = button.closest("article");
+            article.replaceWith(article.cloneNode(true));
+          }
+        }, window.fixtureLikeDelay || 50);
+      });
+    </script>
+  </body>
+</html>

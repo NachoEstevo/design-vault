@@ -1,0 +1,49 @@
+{
+  "name": "@nachoestevo/design-vault",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "test:browser": "node tests/browser.mjs",
+    "check": "node scripts/check.mjs",
+    "test:vault": "python -m unittest discover -s tests -p test_*.py -v",
+    "check:public": "python scripts/check-public.py"
+  },
+  "devDependencies": {
+    "playwright": "^1.64.0"
+  },
+  "description": "Agent skill for designing with a private, local inspiration library",
+  "license": "MIT",
+  "author": "NachoEstevo",
+  "engines": {
+    "node": ">=22"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NachoEstevo/design-vault.git"
+  },
+  "homepage": "https://github.com/NachoEstevo/design-vault#readme",
+  "bin": {
+    "design-vault": "bin/install.mjs"
+  },
+  "files": [
+    "bin/install.mjs",
+    "scripts/install.py",
+    "skills/design-vault/SKILL.md",
+    "skills/design-vault/vault.example.json",
+    "skills/design-vault/agents/*.yaml",
+    "skills/design-vault/references/*.md",
+    "skills/design-vault/scripts/*.py"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "agent-skills",
+    "codex",
+    "design",
+    "inspiration",
+    "design-vault"
+  ]
+}
