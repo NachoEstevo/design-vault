@@ -47,7 +47,7 @@ For another agent that supports `SKILL.md` folders, specify its skills directory
 python scripts/install.py --skills-root "/path/to/skills"
 ```
 
-You can also copy `skills/design-vault` manually, duplicate `vault.example.json` as `vault.json` in the installed copy, and set `service_url`. To inspect your own originals, install with `--vault-root "/path/to/Design Shelf"`. To use your own hosted service, pass `--service "https://your-vault.workers.dev"`. This does not install a skill in ChatGPT or guarantee equivalent tool access in every agent.
+You can also copy `skills/design-vault` manually, duplicate `vault.example.json` as `vault.json` in the installed copy, and set `service_url`. To let your agent open your own originals, install with `--vault-root "/path/to/Design Shelf"`; if the extension's default `Downloads/Design Shelf` folder already holds references, the installer uses it automatically (pass `--shared-only` to skip it). The shared service stays configured as a fallback. To use your own hosted service, pass `--service "https://your-vault.workers.dev"`. This does not install a skill in ChatGPT or guarantee equivalent tool access in every agent.
 
 ### Install now with npx from GitHub
 

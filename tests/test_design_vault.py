@@ -12,7 +12,7 @@ from unittest.mock import patch
 SCRIPTS = Path(__file__).resolve().parents[1] / "skills" / "design-vault" / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 from catalog import Catalog
-from vault import brief, choose, contact_sheet, sample_colors, search, select, retrieve
+from vault import brief, choose, contact_sheet, queue, sample_colors, search, select, retrieve
 
 PNG = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jC0kAAAAASUVORK5CYII=")
 
@@ -163,6 +163,35 @@ class VaultTests(unittest.TestCase):
         self.assertEqual(image["analysis"]["colors"], ["#f4f4f2", "#111111"])
         self.assertIn("staggered", brief(image)["signature"])
         self.assertEqual(search(self.catalog, "staggered strip", "strip-v1")["candidates"][0]["id"], "1001:0")
+
+    def test_queue_lists_unreviewed_and_incomplete_originals_only(self):
+        for post in (1001, 1002, 1003):
+            self.reference(post)
+        self.catalog.refresh()
+        self.catalog.describe("1002:0", {"summary": "Cards without reconstruction detail"})
+        self.catalog.describe("1003:0", {"summary": "Complete description", "layout": "Three columns",
+                                         "signature": "Overlap", "recipe": "Grid", "colors": ["#ffffff"]})
+        result = queue(self.catalog)
+        missing = {item["id"]: item["missing"] for item in result["images"]}
+        self.assertEqual((result["pending"], result["unreviewed"]), (2, 1))
+        self.assertEqual(missing["1001:0"], ["observation"])
+        self.assertEqual(missing["1002:0"], ["layout", "signature", "recipe", "colors"])
+        self.assertNotIn("1003:0", missing)
+        self.assertEqual([item["id"] for item in queue(self.catalog, scope="unreviewed")["images"]], ["1001:0"])
+
+    def test_requested_components_get_a_reviewed_role_after_the_direction(self):
+        for post in range(1001, 1007):
+            self.reference(post, note="Warm agency landing with cards")
+        self.reference(1100, category="footers", note="Warm agency footer")
+        self.catalog.refresh()
+        self.catalog.describe("1100:0", {"summary": "Footer with large wordmark", "components": ["footer"]})
+        result = search(self.catalog, "warm agency landing", "roles-v1", limit=3, seed=4, components=["footer"])
+        roles = {item["id"]: item["role"] for item in result["candidates"]}
+        self.assertEqual(result["candidates"][0]["role"], "direction")
+        self.assertEqual(roles.get("1100:0"), "footer")
+        self.assertEqual(result["coverage"], [{"component": "footer", "reviewed": True}])
+        again = search(self.catalog, "warm agency landing", "roles-v1", limit=3, components=["footer"])
+        self.assertEqual({item["id"]: item["role"] for item in again["candidates"]}, roles)
 
     def test_invalid_colors_are_rejected(self):
         self.reference()

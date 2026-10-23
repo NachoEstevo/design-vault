@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createService } from "../service/worker.js";
 import { digest, reference } from "../service/contracts.js";
+import { retrieve } from "../service/retrieval.js";
 
 // Conditional writes model R2's compare-and-swap contract, including contention.
 class Bucket {
@@ -240,4 +241,34 @@ test("bounded contention retry preserves complete catalog and rate limit is enfo
       .status,
     429,
   );
+});
+test("retrieval sets a direction, covers each requested role and avoids near-duplicate complements", async () => {
+  const look = (id, components, style, palette, tags = ["warm"]) => ({
+    postId: id,
+    category: { id: "landings" },
+    note: "warm",
+    tags,
+    images: [
+      {
+        id: `${id}:0`,
+        sha256: id.padStart(64, "0"),
+        observation: { summary: "Warm landing", style, palette, components },
+      },
+    ],
+  });
+  const result = await retrieve(
+    [
+      look("1", ["hero", "cards"], ["editorial", "warm"], ["cream", "brown"]),
+      look("2", ["hero", "cards"], ["editorial", "warm"], ["cream", "brown"]),
+      look("3", ["hero", "cards"], ["dark", "technical"], ["black", "green"]),
+      look("4", ["footer"], ["quiet"], ["white"], ["warm", "footer"]),
+    ],
+    { query: "warm landing cards", components: ["footer"], session: "roles", limit: 3 },
+  );
+  const roles = Object.fromEntries(result.references.map((item) => [item.id, item.role]));
+  assert.equal(result.references[0].role, "direction");
+  assert.equal(Object.values(roles).filter((role) => role === "footer").length, 1);
+  assert.equal(roles["4:0"], "footer");
+  // Two identical warm editorial looks never fill the remaining slot together.
+  assert(!("1:0" in roles && "2:0" in roles));
 });

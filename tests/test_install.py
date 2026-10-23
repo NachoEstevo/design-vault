@@ -37,6 +37,24 @@ class InstallationTests(unittest.TestCase):
         self.assertEqual({item.name for item in target.iterdir()},
                          {"SKILL.md", "agents", "references", "scripts", "vault.example.json", "vault.json"})
 
+    def test_local_library_keeps_the_shared_service_as_fallback(self):
+        config = json.loads((installer.install(self.vault, self.skills) / "vault.json").read_text(encoding="utf-8"))
+        self.assertEqual(config["service_url"], "https://design-vault.nachoestevo.workers.dev")
+
+    def test_cli_uses_the_extension_default_library_unless_shared_only(self):
+        shelf = self.base / "home" / "Downloads" / "Design Shelf" / "landings" / "2026-10-10_1"
+        shelf.mkdir(parents=True)
+        (shelf / "reference.json").write_text("{}", encoding="utf-8")
+        environment = {**os.environ, "USERPROFILE": str(self.base / "home"), "HOME": str(self.base / "home")}
+        for flags, expected in (([], True), (["--shared-only"], False)):
+            skills = self.base / f"skills-{expected}"
+            result = subprocess.run([sys.executable, str(REPO / "scripts" / "install.py"), "--skills-root", str(skills), *flags],
+                                    capture_output=True, text=True, env=environment)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            config = json.loads((skills / "design-vault" / "vault.json").read_text(encoding="utf-8"))
+            self.assertEqual("vault_root" in config, expected)
+            self.assertIn("service_url", config)
+
     def test_invalid_library_does_not_create_destination(self):
         with self.assertRaises(FileNotFoundError):
             installer.install(self.vault / "missing", self.skills)

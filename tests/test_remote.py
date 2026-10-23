@@ -36,6 +36,13 @@ class RemoteTests(unittest.TestCase):
             factory.return_value.open.return_value=io.BytesIO(b" "*100001)
             with self.assertRaises(ValueError):remote.search("https://vault.test","cards","project",[])
 
+    def test_accepts_reconstruction_fields_and_roles_but_checks_colors(self):
+        value=self.response();value["references"][0].update(role="direction",layout="Panel inset 10%",
+            signature="Staggered photo strip",recipe="One flex row",colors=["#0a3fae","#f2f3ef"])
+        self.assertEqual(remote.validated(value,"project",5)["references"][0]["role"],"direction")
+        value["references"][0]["colors"]=["blue"]
+        with self.assertRaises(ValueError):remote.validated(value,"project",5)
+
     def test_refuses_unsafe_origins_before_sending_a_brief(self):
         for origin in ("http://vault.test","https://secret@vault.test","https://vault.test/private","https://vault.test/?key=value"):
             with self.assertRaises(ValueError):remote.origin(origin)

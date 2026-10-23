@@ -104,23 +104,51 @@ export async function retrieve(references, brief) {
   }
   const perPost = new Map(),
     hashes = new Set(),
-    selected = [];
-  for (const candidate of [...roleCandidates, ...candidates]) {
-    if (selected.length >= brief.limit) break;
+    picked = [];
+  const look = (candidate) => {
+    const visual = candidate.image.observation;
+    return visual
+      ? tokens([...visual.style, ...visual.palette, ...visual.components].join(" "))
+      : new Set();
+  };
+  // Overlap of style, palette and components; near-duplicates crowd out complements.
+  const similar = (candidate) => {
+    const own = look(candidate);
+    if (!own.size) return false;
+    return picked.some(({ candidate: other }) => {
+      const prior = look(other);
+      const shared = [...own].filter((word) => prior.has(word)).length;
+      return shared / (own.size + prior.size - shared || 1) > 0.5;
+    });
+  };
+  const take = (candidate, role) => {
+    if (picked.length >= brief.limit || picked.some((item) => item.candidate.id === candidate.id))
+      return;
     if (
       (perPost.get(candidate.ref.postId) || 0) >= 2 ||
       hashes.has(candidate.image.sha256)
     )
-      continue;
-    perPost.set(
-      candidate.ref.postId,
-      (perPost.get(candidate.ref.postId) || 0) + 1,
-    );
+      return;
+    perPost.set(candidate.ref.postId, (perPost.get(candidate.ref.postId) || 0) + 1);
     hashes.add(candidate.image.sha256);
+    picked.push({ candidate, role });
+  };
+  // The strongest match sets the direction; each requested role then gets its own reference.
+  if (candidates[0]) take(candidates[0], "direction");
+  for (const candidate of roleCandidates)
+    take(
+      candidate,
+      brief.components.find((component) => matchesRole(candidate, component)),
+    );
+  for (const candidate of candidates)
+    if (!similar(candidate)) take(candidate, "complement");
+  for (const candidate of candidates) take(candidate, "complement");
+  const selected = picked.map(({ candidate, role }) => {
     const visual = candidate.image.observation;
     // No spreads of private records: notes, post IDs, digests and object keys never cross this boundary.
-    selected.push({
+    return {
       id: candidate.id,
+      role,
       category: candidate.ref.category.id,
       tags: candidate.ref.tags,
       reviewed: Boolean(visual),
@@ -138,8 +166,8 @@ export async function retrieve(references, brief) {
       uncertainty:
         visual?.uncertainty ||
         "Original pixels are not provided to this client.",
-    });
-  }
+    };
+  });
   return {
     schemaVersion: 1,
     mode: "descriptions",

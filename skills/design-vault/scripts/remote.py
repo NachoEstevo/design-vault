@@ -20,18 +20,24 @@ def validated(value, session, limit):
     references=value.get("references")
     if not isinstance(references,list) or len(references)>limit:
         raise ValueError("Invalid inspiration references")
-    allowed={"id","category","tags","reviewed","description","style","palette","components","typography","uncertainty"}
+    required={"id","category","tags","reviewed","description","style","palette","components","typography","uncertainty"}
+    # Reconstruction fields and roles arrived later; older services omit them.
+    optional={"role","layout","signature","recipe","colors"}
     for item in references:
-        if not isinstance(item,dict) or set(item)!=allowed or not re.fullmatch(r"[a-f0-9]{24}",str(item.get("id"))):
+        if (not isinstance(item,dict) or not required <= set(item) <= required | optional
+                or not re.fullmatch(r"[a-f0-9]{24}",str(item.get("id")))):
             raise ValueError("Unexpected reference fields; originals are not supported")
         if not isinstance(item["reviewed"],bool):
             raise ValueError("Invalid review status")
-        for key in ("category","description","typography","uncertainty"):
-            if not isinstance(item[key],str) or len(item[key])>2000:
+        for key in ("category","description","typography","uncertainty","role","layout","signature","recipe"):
+            if key in item and (not isinstance(item[key],str) or len(item[key])>2000):
                 raise ValueError("Invalid reference description")
         for key in ("tags","style","palette","components"):
             if not isinstance(item[key],list) or len(item[key])>30 or any(not isinstance(text,str) or len(text)>80 for text in item[key]):
                 raise ValueError("Invalid reference metadata")
+        if "colors" in item and (not isinstance(item["colors"],list) or len(item["colors"])>8 or
+                                 any(not re.fullmatch(r"#[0-9a-f]{6}",str(color)) for color in item["colors"])):
+            raise ValueError("Invalid reference colors")
     return value
 
 

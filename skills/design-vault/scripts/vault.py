@@ -62,7 +62,7 @@ def save_session(catalog, key, data):
     catalog.db.commit()
 
 
-def brief(image, score=None):
+def brief(image, score=None, role=None):
     analysis = image.get("analysis")
     result = {"id": image["id"], "post_id": image["post_id"], "category": image["category"],
               "path": image["path"], "source": image["url"], "note": image["note"][:300],
@@ -74,7 +74,46 @@ def brief(image, score=None):
                 result[field] = analysis[field]
     if score is not None:
         result["relevance"] = round(score, 3)
+    if role:
+        result["role"] = role
     return result
+
+
+def covers(image, component):
+    analysis = image.get("analysis")
+    words = set().union(*query_groups(component)) if query_groups(component) else set()
+    return bool(analysis) and bool(words & tokens(" ".join(analysis["components"]) + " " + image["category"]))
+
+
+def assign_roles(candidates, selection, components, limit):
+    """The strongest pick sets the direction; each requested component gets a reviewed reference."""
+    # Weighted sampling picks in random order; the best match among the picks leads.
+    selection, protected = sorted(selection, key=lambda item: -item[1]), set()
+    for component in components:
+        covering = next((image["id"] for image, _ in selection if covers(image, component)), None)
+        if covering:
+            protected.add(covering)
+            continue
+        extra = next(((image, score) for image, score in candidates
+                      if covers(image, component) and all(image["id"] != other["id"] for other, _ in selection)), None)
+        if not extra:
+            continue
+        if len(selection) >= limit:
+            # Drop the weakest unprotected pick, never the direction or another role.
+            spare = [index for index, (image, _) in enumerate(selection) if index and image["id"] not in protected]
+            if not spare:
+                continue
+            selection.pop(spare[-1])
+        selection.append(extra)
+        protected.add(extra[0]["id"])
+    roles = {}
+    if selection:
+        roles[selection[0][0]["id"]] = "direction"
+    for component in components:
+        match = next((image for image, _ in selection if image["id"] not in roles and covers(image, component)), None)
+        if match:
+            roles[match["id"]] = component
+    return selection, {image["id"]: roles.get(image["id"], "complement") for image, _ in selection}
 
 
 def retrieve(catalog, query, category=None):
@@ -154,26 +193,35 @@ def select(catalog, candidates, limit, seed):
     return chosen
 
 
-def search(catalog, query, key, limit=12, seed=None, category=None):
+def search(catalog, query, key, limit=12, seed=None, category=None, components=None):
     if not 1 <= limit <= 12:
         raise ValueError("Candidate limit must be between 1 and 12")
+    components = [component for component in (components or []) if component.strip()][:8]
     session_key(key)
-    query_hash = hashlib.sha256(json.dumps([folded(query), category, limit]).encode()).hexdigest()
+    identity = [folded(query), category, limit] + ([components] if components else [])
+    query_hash = hashlib.sha256(json.dumps(identity).encode()).hexdigest()
     previous = load_session(catalog, key)
     if previous:
         if previous["query_hash"] != query_hash:
             raise ValueError("This session has a different brief; use a new ID for the alternative")
         ids = previous.get("chosen") or previous["candidates"]
+        roles = previous.get("roles", {})
         return {"session": key, "seed": previous["seed"], "reused": True,
-                "candidates": [brief(catalog.image(image_id)) for image_id in ids], "stats": catalog.stats}
+                "candidates": [brief(catalog.image(image_id), role=roles.get(image_id)) for image_id in ids],
+                "stats": catalog.stats}
+    # The brief alone picks the direction; requested components only fill their own roles.
     candidates = retrieve(catalog, query, category)
+    pool = retrieve(catalog, " ".join([query, *components]), category) if components else candidates
     seed = secrets.randbits(32) if seed is None else seed
-    selection = select(catalog, candidates, limit, seed)
+    selection, roles = assign_roles(pool, select(catalog, candidates, limit, seed), components, limit)
     state = {"query_hash": query_hash, "seed": seed, "candidates": [image["id"] for image, _ in selection],
-             "chosen": [], "created_at": datetime.now(timezone.utc).isoformat()}
+             "roles": roles, "chosen": [], "created_at": datetime.now(timezone.utc).isoformat()}
     save_session(catalog, key, state)
     return {"session": key, "seed": seed, "reused": False, "matched": len(candidates),
-            "candidates": [brief(image, score) for image, score in selection], "stats": catalog.stats}
+            "candidates": [brief(image, score, roles[image["id"]]) for image, score in selection],
+            "coverage": [{"component": component, "reviewed": any(covers(image, component) for image, _ in selection)}
+                         for component in components],
+            "stats": catalog.stats}
 
 
 def choose(catalog, key, ids):
@@ -236,6 +284,30 @@ def contact_sheet(catalog, key, output):
     return {"sheet": str(output), "images": len(ids), "session": key}
 
 
+RECONSTRUCTION = ("layout", "signature", "recipe", "colors")
+
+
+def queue(catalog, limit=20, scope="all"):
+    """List originals whose observation is missing or lacks the fields another agent needs to rebuild them."""
+    if not 1 <= limit <= 100:
+        raise ValueError("Queue limit must be between 1 and 100")
+    pending = []
+    for row in catalog.db.execute("SELECT data FROM images"):
+        image = json.loads(row[0])
+        analysis = image.get("analysis")
+        missing = ["observation"] if not analysis else [field for field in RECONSTRUCTION if not analysis.get(field)]
+        if not missing or (scope == "unreviewed" and analysis) or (scope == "incomplete" and not analysis):
+            continue
+        pending.append((image, missing))
+    # Newest captures first: they are the ones readers have not seen described yet.
+    pending.sort(key=lambda item: (item[0]["captured_at"], item[0]["id"]), reverse=True)
+    return {"pending": len(pending),
+            "unreviewed": sum(missing == ["observation"] for _, missing in pending),
+            "images": [{"id": image["id"], "category": image["category"], "path": image["path"],
+                        "note": image["note"][:300], "tags": image["tags"][:12], "missing": missing}
+                       for image, missing in pending[:limit]]}
+
+
 def sample_colors(catalog, image_id, count=6):
     """Measure dominant colors from the original's pixels so observations cite real values."""
     try:
@@ -267,6 +339,7 @@ def parser():
     finder.add_argument("--limit", type=int, default=12)
     finder.add_argument("--seed", type=int)
     finder.add_argument("--category")
+    finder.add_argument("--components", nargs="*", default=[])
     selection = commands.add_parser("choose")
     selection.add_argument("--session", required=True)
     selection.add_argument("--ids", nargs="+", required=True)
@@ -279,6 +352,9 @@ def parser():
     colors = commands.add_parser("colors")
     colors.add_argument("--image", required=True)
     colors.add_argument("--count", type=int, default=6)
+    backlog = commands.add_parser("queue")
+    backlog.add_argument("--limit", type=int, default=20)
+    backlog.add_argument("--scope", choices=("all", "unreviewed", "incomplete"), default="all")
     state = commands.add_parser("session")
     state.add_argument("--session", required=True)
     return command
@@ -302,13 +378,15 @@ def main():
             categories = Counter(json.loads(row[0])["category"] for row in catalog.db.execute("SELECT data FROM images"))
             result = {"root": str(catalog.root), "cache": str(catalog.cache), **stats, "categories": dict(categories)}
         elif args.command == "search":
-            result = search(catalog, args.query, args.session, args.limit, args.seed, args.category)
+            result = search(catalog, args.query, args.session, args.limit, args.seed, args.category, args.components)
         elif args.command == "choose":
             result = choose(catalog, args.session, args.ids)
         elif args.command == "sheet":
             result = contact_sheet(catalog, args.session, args.out)
         elif args.command == "colors":
             result = sample_colors(catalog, args.image, max(2, min(args.count, 8)))
+        elif args.command == "queue":
+            result = queue(catalog, args.limit, args.scope)
         elif args.command == "describe":
             result = catalog.describe(args.image, read_json(Path(args.input), 16 * 1024))
         else:
