@@ -1,10 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Design Shelf reference cards">
-<rect x="4" y="4" width="120" height="120" rx="29" fill="#24483c"/>
-<rect x="38" y="25" width="66" height="59" rx="8" fill="#dca17e"/>
-<rect x="30" y="35" width="70" height="59" rx="8" fill="#a5b5a0"/>
-<rect x="22" y="45" width="74" height="59" rx="8" fill="#f7f2e8"/>
-<rect x="32" y="56" width="24" height="36" rx="4" fill="#24483c"/>
-<rect x="64" y="59" width="21" height="5" rx="2.5" fill="#24483c"/>
-<rect x="64" y="70" width="16" height="5" rx="2.5" fill="#92a38e"/>
-<rect x="64" y="81" width="21" height="5" rx="2.5" fill="#92a38e"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Design Vault reference cards">
+  <rect width="64" height="64" rx="12" fill="#0a3fae"/>
+  <g stroke="#0a3fae" stroke-width="2.5" stroke-linejoin="round">
+    <rect x="23" y="10" width="31" height="32" rx="2.5" fill="#bcd6f2"/>
+    <rect x="17" y="17" width="31" height="32" rx="2.5" fill="#e5e8e3"/>
+    <rect x="10" y="24" width="31" height="32" rx="2.5" fill="#f2f3ef"/>
+  </g>
 </svg>
