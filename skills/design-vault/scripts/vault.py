@@ -47,7 +47,7 @@ def query_groups(query):
 
 def session_key(value):
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,79}", value):
-        raise ValueError("Sesión inválida: usá un ID corto con letras, números, guiones o puntos")
+        raise ValueError("Invalid session ID: use letters, numbers, hyphens, or dots")
     return value
 
 
@@ -77,7 +77,7 @@ def brief(image, score=None):
 def retrieve(catalog, query, category=None):
     groups = query_groups(query)
     if not groups:
-        raise ValueError("Usá palabras concretas para buscar referencias")
+        raise ValueError("Use concrete terms to search for references")
     expression = " OR ".join('"' + word + '"' for word in sorted(set.union(*groups)))
     # FTS narrows candidates without returning the whole vault to the model.
     rows = catalog.db.execute("SELECT id FROM search WHERE search MATCH ? ORDER BY bm25(search, 0, 6, 3, 5, 1) LIMIT 72",
@@ -153,13 +153,13 @@ def select(catalog, candidates, limit, seed):
 
 def search(catalog, query, key, limit=12, seed=None, category=None):
     if not 1 <= limit <= 12:
-        raise ValueError("El límite de candidatos debe estar entre 1 y 12")
+        raise ValueError("Candidate limit must be between 1 and 12")
     session_key(key)
     query_hash = hashlib.sha256(json.dumps([folded(query), category, limit]).encode()).hexdigest()
     previous = load_session(catalog, key)
     if previous:
         if previous["query_hash"] != query_hash:
-            raise ValueError("Esta sesión tiene otro pedido; elegí un nuevo ID para la alternativa")
+            raise ValueError("This session has a different brief; use a new ID for the alternative")
         ids = previous.get("chosen") or previous["candidates"]
         return {"session": key, "seed": previous["seed"], "reused": True,
                 "candidates": [brief(catalog.image(image_id)) for image_id in ids], "stats": catalog.stats}
@@ -176,13 +176,13 @@ def search(catalog, query, key, limit=12, seed=None, category=None):
 def choose(catalog, key, ids):
     state = load_session(catalog, key)
     if not state:
-        raise ValueError("Buscá candidatos antes de elegir referencias")
+        raise ValueError("Search candidates before choosing references")
     if not 1 <= len(ids) <= 5 or len(set(ids)) != len(ids):
-        raise ValueError("Elegí entre una y cinco imágenes sin repetir IDs")
+        raise ValueError("Choose one to five images with unique IDs")
     if any(image_id not in state["candidates"] for image_id in ids):
-        raise ValueError("La selección debe pertenecer a los candidatos de la sesión")
+        raise ValueError("Selection must use candidates from this session")
     if state["chosen"] and state["chosen"] != ids:
-        raise ValueError("La sesión ya tiene una dirección elegida; creá otra para una alternativa")
+        raise ValueError("This session already has a direction; create another for an alternative")
     images = [catalog.image(image_id) for image_id in ids]
     if not state["chosen"]:
         for image_id in ids:
@@ -191,7 +191,7 @@ def choose(catalog, key, ids):
         state["chosen"] = ids
         save_session(catalog, key, state)
     return {"session": key, "seed": state["seed"],
-            "selected": [{**brief(image), "role": "principal" if index == 0 else "complementaria"}
+            "selected": [{**brief(image), "role": "primary" if index == 0 else "complementary"}
                          for index, image in enumerate(images)]}
 
 
@@ -199,16 +199,16 @@ def contact_sheet(catalog, key, output):
     try:
         from PIL import Image, ImageDraw, ImageFont, ImageOps
     except ImportError as error:
-        raise ValueError("La lámina necesita Pillow. Podés abrir directamente pocas imágenes seleccionadas.") from error
+        raise ValueError("Contact sheets require Pillow. You can open a few selected originals directly.") from error
     state = load_session(catalog, key)
     if not state or not state["candidates"]:
-        raise ValueError("La sesión no tiene imágenes candidatas")
+        raise ValueError("This session has no candidate images")
     ids = state["chosen"] or state["candidates"]
     output = Path(output).expanduser().resolve()
     if output.is_relative_to(catalog.root):
-        raise ValueError("Guardá la lámina fuera del vault original")
+        raise ValueError("Save the contact sheet outside the original vault")
     if output.exists():
-        raise ValueError("El destino ya existe; usá un nombre nuevo")
+        raise ValueError("Destination already exists; use a new name")
     cell_width, cell_height, columns = 400, 300, min(3, len(ids))
     sheet = Image.new("RGB", (columns * cell_width, math.ceil(len(ids) / columns) * cell_height), "#f2f0eb")
     draw = ImageDraw.Draw(sheet)
@@ -235,8 +235,8 @@ def contact_sheet(catalog, key, output):
 
 def parser():
     command = argparse.ArgumentParser(description=__doc__)
-    command.add_argument("--root", help="Raíz del vault; reemplaza vault.json para esta operación")
-    command.add_argument("--cache", help="Caché aislada fuera del vault")
+    command.add_argument("--root", help="Vault root; overrides local configuration for this command")
+    command.add_argument("--cache", help="Isolated cache outside the vault")
     commands = command.add_subparsers(dest="command", required=True)
     commands.add_parser("status")
     finder = commands.add_parser("search")
@@ -269,7 +269,7 @@ def main():
             config_path = skill / "vault.json"
             config = read_json(config_path if config_path.exists() else skill / "vault.example.json")
             if config.get("schemaVersion") != 1:
-                raise ValueError("Configuración de skill inválida")
+                raise ValueError("Invalid skill configuration")
             root = config["vault_root"]
         catalog = Catalog(root, args.cache)
         stats = catalog.refresh()
@@ -287,7 +287,7 @@ def main():
         else:
             state = load_session(catalog, args.session)
             if not state:
-                raise ValueError("No existe esa sesión")
+                raise ValueError("Session not found")
             result = {"session": args.session, **state,
                       "images": [brief(catalog.image(image_id)) for image_id in state["chosen"] or state["candidates"]]}
         print(json.dumps(result, ensure_ascii=False, indent=2))

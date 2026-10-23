@@ -1,20 +1,20 @@
 ---
 name: replace-with-skill-name
-description: Describe la tarea concreta que resuelve y cuándo corresponde usarla.
+description: Describe the specific task this skill handles and when to use it.
 ---
 
-# Nombre de la skill
+# Skill name
 
-Esta es una plantilla; no es una skill publicada. Copiala como `skills/<nombre>/SKILL.md` y reemplazá los campos antes de usarla.
+This is a template, not a published skill. Copy it to `skills/<name>/SKILL.md` and replace its fields before use.
 
-## Resultado
+## Outcome
 
-Definí qué recibe el agente, qué entrega y qué decisiones específicas mejora esta skill.
+Define the agent's inputs, deliverable, and the specific decisions this skill improves.
 
-## Flujo
+## Workflow
 
-Describí solo las acciones y criterios que aportan información útil más allá de la capacidad general del agente. Vinculá referencias y scripts cuando exista una necesidad concreta; no crees carpetas vacías por convención.
+Include only actions and criteria that add useful information beyond the agent's general abilities. Link references and scripts when a concrete need justifies them; do not create empty directories by convention.
 
-## Comprobación
+## Verification
 
-Indicá cómo revisar el resultado, qué evidencia conservar y qué límites importa comunicar. La configuración personal, credenciales y bibliotecas no se incluyen en esta carpeta pública.
+Explain how to review the result, which evidence matters, and relevant limitations. Personal configuration, credentials, and libraries do not belong in this public directory.

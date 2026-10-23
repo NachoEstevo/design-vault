@@ -1,4 +1,4 @@
 interface:
   display_name: "Design Vault"
-  short_description: "Diseñá con pocas referencias de tu biblioteca personal"
-  default_prompt: "Usá $design-vault para diseñar con mi biblioteca, elegir pocas referencias y proponer tipografía y assets relevantes."
+  short_description: "Design with a few references from your private library"
+  default_prompt: "Use $design-vault to design with my library, select a few references, and propose relevant typography and assets."

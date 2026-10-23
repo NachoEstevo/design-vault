@@ -1,19 +1,19 @@
-# Movimiento en landings
+# Landing-page motion
 
-Preferencia personal: una landing puede ser cálida y profesional y tener movimiento visible. Elegir dos o tres recursos compatibles y diseñar su secuencia; no aplicar el mismo fade a todo ni copiar una demo de producto que no exista en el proyecto.
+A warm, professional landing can have clearly visible movement. Choose two or three compatible devices and choreograph them rather than fading everything identically or copying a product demo that does not exist in the project.
 
-## Patrones adaptables
+## Adaptable patterns
 
-Estos patrones describen recursos de movimiento; no dependen de proyectos o rutas del autor. Elegir solo los que sirvan al contenido y comprobarlos en el navegador.
+These patterns are independent of the author's local projects. Use only what serves the content and verify it in a browser.
 
-- **Entrada editorial:** palabras que ascienden desde una máscara, imágenes que se abren y luego se asientan. Mantener el texto seleccionable y accesible, con saltos naturales y stagger corto.
-- **Profundidad de producto:** un frame entra con profundidad; un objeto manipulable representa información real del producto. La interacción debe tener un objeto y un motivo. No agregar stickers ni drag solo por decorar.
-- **Piezas por capas:** una carpeta, fichas o packaging entran con una secuencia; al hover las piezas se levantan. Adaptar a entregables existentes, con lectura y función claras.
+- **Editorial entrance:** words rise from masks while images open and settle. Keep text selectable and accessible, with natural wrapping and bounded stagger.
+- **Product depth:** a product frame enters with depth; a manipulable object represents real product information. An interaction needs an object and a reason. Do not add stickers or dragging as decoration.
+- **Layered pieces:** folders, sheets, or packaging enter in a sequence and lift on hover. Adapt this to actual deliverables, with clear reading order and function.
 
-## Elegir y comprobar
+## Choose and verify
 
-1. Definir el momento principal (hero, obra o demostración) y qué debe reconocer el visitante. Una entrada orquestada puede durar más que el feedback de un control; no retrasar la acción para esperar la animación.
-2. Separar movimiento de entrada y respuesta al puntero en wrappers o propiedades con dueños claros. Elegir transform/opacity por defecto. Una máscara con `clip-path` puede aportar valor en un título o imagen: comprobar recortes y rendimiento en el navegador objetivo, sin asumir que toda máscara es gratuita o está acelerada.
-3. Probar a velocidad normal: el recurso elegido debe verse sin tener que buscarlo. Variar amplitud y ritmo según tamaño real, no fijar el mismo desplazamiento para un título, una imagen y un botón. Dar protagonismo a pocos momentos y conservar lectura estable entre ellos.
-4. Comprobar ida y vuelta del hover, clic rápido, foco, touch, entrada por scroll y preferencia reducida que cambia durante la sesión. Los objetos no deben quedarse ocultos, superponerse al texto ni impedir abrir el contenido. Distinguir foco de teclado y foco por puntero: mostrar inmediatamente un reveal al tabular no debe desplazar un botón entre pointerdown y click. Probar acciones durante la entrada, no solo después de que todo se asiente. Mantener alternativas estáticas sin JS y sin APIs opcionales.
-5. Grabar el flujo y revisar estados intermedios y finales. En títulos por palabras, comprobar también nombre accesible completo, selección de texto, acentos/descendentes y el máximo de dos líneas después de cargar la fuente. Dar margen de máscara vertical y horizontal a los glifos, especialmente con tracking negativo; compensarlo sin cambiar los saltos de línea. Quitar el recorte cuando termina la entrada y en estados estáticos, de foco o movimiento reducido. Una caja de texto que cabe no prueba que sus letras no estén cortadas: inspeccionar la tipografía renderizada.
+1. Define the principal moment: hero, work, or demonstration. Decide what the visitor should recognize. An entrance may last longer than control feedback, but must not delay actions.
+2. Give entrance and pointer response distinct wrappers or property ownership. Prefer transform/opacity. A text/image `clip-path` may help; check clipping and performance in the target browser rather than assuming all masks are free or accelerated.
+3. Review at normal speed. The effect should be apparent without searching for it. Scale amplitude and rhythm to each element rather than using one displacement for headings, images, and buttons. Keep reading stable between a few prominent moments.
+4. Check hover in both directions, quick clicks, keyboard focus, touch, scroll entry, and reduced-motion changes during a session. Do not leave objects hidden, covering text, or blocking content. Revealing on Tab must not move a pointer target between pointerdown and click. Test during entrances and retain static fallbacks without JavaScript or optional APIs.
+5. Record intermediate and final states. For word-based headings, check accessible names, selection, accents/descenders, and two-line limits after fonts load. Leave horizontal and vertical mask margins around glyphs, especially with negative tracking; compensate without changing wrapping. Remove clipping after entry and in static, focus, and reduced-motion states. A fitting text box does not prove glyphs are intact; inspect the rendered font.

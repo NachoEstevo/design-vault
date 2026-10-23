@@ -1,148 +1,150 @@
 # Design Vault
 
-**Tu biblioteca de inspiración, convertida en decisiones de diseño.**
+**Turn your inspiration library into design decisions.**
 
-Skills para agentes que diseñan con referencias elegidas por vos. Guardá imágenes de X con contexto, recuperá unas pocas según lo que necesita cada proyecto y llevá esas ideas a una interfaz que funcione.
+Agent skills for designing with references you chose yourself. Capture images from X with context, retrieve a few that fit each project, and turn those ideas into an interface that works.
 
-[Instalar](#instalar-design-vault) · [Cómo funciona](#cómo-funciona) · [Capturar referencias](docs/capture.md) · [Almacenamiento](docs/storage.md) · [Crear otra skill](CONTRIBUTING.md)
+**Current release: local capture and retrieval.** The planned hosted mode lets anyone request design guidance derived from the owner's private references, without a reference gallery or original-image downloads. People can also run their own vault. See the [private inspiration service architecture](docs/private-cloud.md); the cloud service is not connected or deployed yet.
 
-## Qué incluye
+[Install](#install) · [How it works](#how-it-works) · [Capture references](docs/capture.md) · [Storage](docs/storage.md) · [Add a skill](CONTRIBUTING.md)
 
-| Carpeta | Para qué sirve |
+## What's included
+
+| Directory | Purpose |
 | --- | --- |
-| [`skills/design-vault`](skills/design-vault/SKILL.md) | Buscar, seleccionar y aplicar referencias de una biblioteca local privada. |
-| [`extension`](extension) | Design Shelf: capturar imágenes de X desde Chrome o Brave, con nota, categoría y etiquetas. |
-| [`templates`](templates/SKILL.template.md) | Punto de partida para una nueva skill con su propio alcance. No se instala como skill. |
-| [`docs`](docs) | Instalación, captura, arquitectura, almacenamiento y límites actuales. |
-| [`tests`](tests) | Pruebas con datos sintéticos, sin tu biblioteca personal. |
+| [`skills/design-vault`](skills/design-vault/SKILL.md) | Find, select, and apply references from a private local library. |
+| [`extension`](extension) | Design Shelf: capture images from X in Chrome or Brave, with notes, categories, and tags. |
+| [`templates`](templates/SKILL.template.md) | A starting point for a future skill with its own scope. Not an installable skill. |
+| [`docs`](docs) | Setup, capture, architecture, storage, and current limitations. |
+| [`tests`](tests) | Synthetic fixtures and behavioral checks. No personal library. |
 
-Hoy hay **una skill disponible**. El repo admite otras en `skills/<nombre>/`; las ideas para ampliarlo están en [la guía de contribución](CONTRIBUTING.md). No hace falta dividir la skill actual para usarla.
+**One skill is available today.** Additional skills can live in `skills/<name>/`. See [contributing](CONTRIBUTING.md) for possible future additions; they are not implemented or required to use Design Vault.
 
-## Instalar Design Vault
+## Install
 
-Necesitás **Python 3.10+** con SQLite FTS5, un agente que pueda ejecutar scripts y abrir imágenes, y una carpeta local exportada por Design Shelf. Node y Google Drive no son requisitos de la skill.
+You need **Python 3.10+** with SQLite FTS5, an agent that can run scripts and view images, and a local library exported by Design Shelf. The skill itself does not need Node, Google Drive, or API keys.
 
-### Codex, desde una copia del repo
+### From a clone
 
 ```sh
 git clone https://github.com/NachoEstevo/design-vault.git
 cd design-vault
-python scripts/install.py --vault-root "/ruta/a/Design Shelf"
+python scripts/install.py --vault-root "/path/to/Design Shelf"
 ```
 
-### npm / npx: preparado, todavía sin publicar
-
-El paquete está preparado como `@nachoestevo/design-vault`, con el comando `design-vault`, sin dependencias npm de ejecución. **Todavía no está publicado en el registro npm.** La disponibilidad del nombre y los permisos de publicación se revisan al publicarlo.
-
-Después de publicar una versión, la instalación será:
-
-```sh
-npx @nachoestevo/design-vault --vault-root "/ruta/a/Design Shelf"
-```
-
-O una instalación global del comando:
-
-```sh
-npm install -g @nachoestevo/design-vault
-design-vault --vault-root "/ruta/a/Design Shelf"
-```
-
-El comando sigue necesitando Python 3.10+; no lo descarga ni instala. El paquete lleva únicamente la skill y su instalador, sin extensión, pruebas ni vault. No usa scripts de instalación automática. Para probar el paquete antes de publicarlo, ver [publicación](docs/publishing.md).
-
-### Configuración y otros agentes
-
-En Windows también podés usar:
+Windows PowerShell:
 
 ```powershell
 ./scripts/install-design-vault.ps1 -VaultRoot "$HOME/Downloads/Design Shelf"
 ```
 
-El instalador copia solo la skill, respeta `CODEX_HOME` y **se detiene si ya existe una instalación**. Tu configuración se escribe en la copia instalada, fuera del repo. Reiniciá la sesión del agente si la skill aún no aparece.
+The installer copies only the skill into Codex's skills directory, respects `CODEX_HOME`, and **refuses to overwrite an existing installation**. Configuration is written to the installed copy, outside this repo. Start a new agent session if the skill has not appeared yet.
 
-Para otro agente que admita carpetas `SKILL.md`, elegí su directorio de skills:
+For another agent that supports `SKILL.md` folders, specify its skills directory:
 
 ```sh
-python scripts/install.py --vault-root "/ruta/a/Design Shelf" --skills-root "/ruta/a/skills"
+python scripts/install.py --vault-root "/path/to/Design Shelf" --skills-root "/path/to/skills"
 ```
 
-También podés copiar manualmente `skills/design-vault`, duplicar `vault.example.json` como `vault.json` en la copia instalada y ajustar `vault_root`. Esto no instala una skill en ChatGPT ni garantiza herramientas equivalentes en todos los agentes.
+You can also copy `skills/design-vault` manually, duplicate `vault.example.json` as `vault.json` in the installed copy, and set `vault_root`. This does not install a skill in ChatGPT or guarantee equivalent tool access in every agent.
 
-Las láminas de miniaturas requieren **Pillow**, una dependencia opcional:
+### npm / npx: ready to package, not published yet
+
+The package is prepared as `@nachoestevo/design-vault`, exposing the `design-vault` command with no npm runtime dependencies. **It is not published to the npm registry yet.** Name availability and publishing permissions must be verified before release.
+
+After publication:
+
+```sh
+npx @nachoestevo/design-vault --vault-root "/path/to/Design Shelf"
+```
+
+Or install the command globally:
+
+```sh
+npm install -g @nachoestevo/design-vault
+design-vault --vault-root "/path/to/Design Shelf"
+```
+
+This command needs Node 22+ and still requires Python 3.10+. It does not download Python or run an automatic install hook. The package includes the skill and installer only, without the extension, tests, or library. See [publishing](docs/publishing.md) to test the package locally before release.
+
+### Optional contact sheets
+
+Search works with the Python standard library. Contact sheets additionally need Pillow:
 
 ```sh
 python -m pip install Pillow
 ```
 
-Sin Pillow, el agente puede buscar y abrir unas pocas imágenes directamente. Para comprobar la instalación:
+Without Pillow, the agent can open a few selected originals directly. Check your installation with:
 
 ```sh
-python "/ruta/a/skills/design-vault/scripts/vault.py" status
+python "/path/to/skills/design-vault/scripts/vault.py" status
 ```
 
-`status` informa cantidad de posts, imágenes y categorías. No sube archivos ni analiza imágenes con un modelo.
+`status` reports reference, image, and category counts. It does not upload files or run image analysis.
 
-## Usarla
+## Use it
 
 ```text
-Usá $design-vault para crear una landing de una panadería.
-Quiero algo cálido y simple, con tres productos y un pedido de demostración.
-Elegí referencias para el hero, las cards y el formulario.
+Use $design-vault to create a warm, simple bakery landing page.
+Show three products and a demo order flow.
+Choose references for the hero, product cards, and order form.
 ```
 
 ```text
-Usá $design-vault para mejorar el footer de esta página.
-Conservá la dirección visual existente y buscá solo lo que haga falta para ese bloque.
+Use $design-vault to improve this page's footer.
+Keep the existing visual direction and search only for references this section needs.
 ```
 
-En Codex se invoca como `$design-vault`; en otros agentes usá su mecanismo de invocación. La skill propone tipografías, define jerarquía y composición, y puede generar fondos o assets mediante ImageGen **si esa herramienta está disponible y aporta algo**. No incluye un servicio de generación ni credenciales de proveedores.
+Codex uses `$design-vault`; other agents use their own invocation mechanism. The skill proposes typography, establishes composition and hierarchy, and can generate backgrounds or assets through ImageGen **when that tool is available and useful**. It does not bundle a generation service or provider credentials.
 
-## Cómo funciona
+## How it works
 
 ```text
-Like en X → nota + categoría → carpeta privada
-                                     ↓
-                         índice local de metadatos
-                                     ↓
-                   referencias relevantes por componente
-                                     ↓
-                   pocas imágenes vistas → diseño + revisión
+Like on X → note + category → private folder
+                                    ↓
+                         local metadata index
+                                    ↓
+                    references for each needed component
+                                    ↓
+                 a few images inspected → design + review
 ```
 
-1. **Entiende qué necesita la pieza.** Una landing puede necesitar una referencia de composición, otra para cards y otra para el contacto. No agrega secciones por copiar una captura.
-2. **Busca sin abrir todos los originales.** Usa notas, etiquetas, categorías y descripciones visuales ya guardadas en un índice SQLite local. La búsqueda es textual, con vocabulario frecuente en español e inglés; no es un buscador visual universal ni usa embeddings.
-3. **Selecciona con variedad acotada.** Normalmente revisa hasta 12 candidatas visuales en total y abre 3–5 originales por diseño. Favorece pertinencia, diversidad, novedades y menor uso reciente; no garantiza resultados distintos si faltan opciones.
-4. **Mantiene continuidad.** Una sesión conserva la selección; un nuevo proyecto puede explorar otra. Cada referencia tiene un rol explícito y conserva su enlace original.
-5. **Aprende de lo observado.** El agente puede guardar una descripción de una imagen que realmente abrió. `describe` persiste esas observaciones; no hace visión por sí mismo.
-6. **Implementa y comprueba.** La guía incluye copy concreto, tipografía, cards con contenido, footers, movimiento visible, reducción de movimiento y revisión responsive.
+1. **Map the page's needs.** A landing page might need one layout reference, another for cards, and another for a contact form. Do not add sections just because they appear in a screenshot.
+2. **Search before opening originals.** A local SQLite index searches notes, tags, categories, and previously saved visual descriptions. Search is textual, with common English and Spanish vocabulary expansion. It is not universal visual search and does not use embeddings.
+3. **Keep selection small and varied.** Usually review up to 12 visual candidates in total and open 3–5 originals per design. Selection favors relevance, diversity, recency, and less recent use. Variety depends on the available library.
+4. **Preserve continuity.** A session keeps its selection; a new project can explore another direction. Each selected reference has a role and retains its source link.
+5. **Record what was actually observed.** The agent can describe an image it inspected. The `describe` command stores those observations; it does not perform vision itself.
+6. **Build and check the result.** Guidelines cover concrete copy, typography, useful card content, footers, visible motion, reduced motion, and responsive review.
 
-Podés editar las [preferencias de diseño](skills/design-vault/references/guidelines.md) y el [catálogo tipográfico](skills/design-vault/references/typography.md) en tu instalación. El brief explícito y la identidad del proyecto tienen prioridad sobre las preferencias por defecto.
+Edit the [design preferences](skills/design-vault/references/guidelines.md) and [typography catalog](skills/design-vault/references/typography.md) in your installation. An explicit brief and the project's brand take precedence over defaults.
 
-Más detalle: [arquitectura](docs/architecture.md) y [operaciones de la skill](skills/design-vault/references/operations.md).
+Details: [architecture](docs/architecture.md) and [skill operations](skills/design-vault/references/operations.md).
 
-## Tu biblioteca sigue siendo tuya
+## Your library stays yours
 
-**Este repo no contiene imágenes de inspiración, notas personales ni una biblioteca compartida.** Cada persona conecta la suya. La captura conserva el enlace y contexto original; guardar una referencia no otorga derechos para reutilizarla como asset de un sitio.
+**This repo contains no inspiration images, personal notes, or shared reference collection.** Everyone connects their own library. Capturing a reference preserves its context and source; it does not grant rights to reuse the image as a website asset.
 
-La skill trabaja sobre archivos locales. Drive para escritorio puede sincronizarlos; R2 puede servir como respaldo privado. Ninguno de los dos se conecta automáticamente al instalar la skill. Los assets generados para un proyecto quedan en ese proyecto, separados del vault.
+The skill reads local files. Drive for desktop can synchronize them, and private R2 storage can hold a backup. Neither is connected automatically by installing the skill. Assets generated for a project stay in that project, separate from the vault.
 
-No hay telemetría en el código de la skill o la extensión. La captura descarga imágenes del CDN de X; el agente o una herramienta externa de generación pueden tener su propio tratamiento de datos. Revisá qué referencias les das como entrada.
+There is no telemetry in the skill or extension code. Capture downloads images from X's CDN; your agent and external generation tools may have their own data handling. Review which references you supply to them.
 
-La configuración local, los originales, las notas, el índice, las miniaturas, las credenciales y las sesiones quedan fuera de Git. [Opciones de almacenamiento y R2](docs/storage.md).
+Local configuration, originals, notes, databases, thumbnails, credentials, and sessions stay out of Git. See [storage and private R2](docs/storage.md).
 
-## Capturar referencias con Design Shelf
+## Capture references with Design Shelf
 
-1. En `chrome://extensions` o `brave://extensions`, activá modo de desarrollador y cargá la carpeta `extension` descomprimida.
-2. En Brave, abrí Design Shelf y elegí **Usar Descargas**. En Chrome podés conectar una carpeta dedicada.
-3. Recargá X. Al dar like a un post con imágenes aparece un modal para escribir una nota, elegir categoría y etiquetas, o saltar el guardado.
-4. Conectá esa carpeta local a Design Vault.
+1. Open `chrome://extensions` or `brave://extensions`, enable Developer mode, and load the `extension` directory unpacked.
+2. In Brave, open Design Shelf and choose **Use Downloads**. Chrome can also connect a dedicated folder.
+3. Reload X. Liking a post with images opens a modal for a note, category, tags, or skipping the save.
+4. Connect that local folder to Design Vault.
 
-Solo se guardan imágenes del post, sin las del citado. Omitir conserva el like y no guarda archivos. La versión actual requiere una nota para guardar. Los fallos quedan pendientes para reintentar desde la biblioteca.
+Only images belonging to the post are captured, excluding quoted posts. Skipping keeps the like without saving files. A note is required to save in the current version. Failed saves remain pending for explicit retry.
 
-[Guía completa de captura, Drive y recuperación](docs/capture.md). La extensión no está publicada en una tienda; su funcionamiento sobre X depende del DOM actual de esa plataforma.
+[Full capture, Drive, and recovery guide](docs/capture.md). The extension is not published in a browser store; live extraction depends on X's current DOM.
 
-## Desarrollo
+## Development
 
-Para las pruebas de extensión necesitás Node 22+ y npm; la skill no los usa.
+Extension tests require Node 22+ and npm. The Python skill does not.
 
 ```sh
 npm ci
@@ -152,17 +154,17 @@ python -m unittest discover -s tests -p "test_*.py" -v
 python scripts/check-public.py
 ```
 
-Prueba sintética de navegador:
+Synthetic browser checks:
 
 ```sh
 npx playwright install chromium
 npm run test:browser
 ```
 
-Las pruebas incluyen recuperación de guardados, validación de rutas, instalación sin sobrescritura, selección reproducible y un catálogo sintético de 800 imágenes. Una prueba sintética no verifica el DOM autenticado de X, los permisos del selector nativo ni una sincronización real de Drive/R2. El control de publicación revisa los archivos versionados; no es una garantía de detección de todos los secretos.
+Checks cover save recovery, path validation, installation without overwrites, reproducible selection, and a synthetic 800-image library. Synthetic tests do not verify authenticated live X, native external-folder permissions, or actual Drive/R2 synchronization. The publication check inspects tracked files and is not a guarantee of detecting every secret.
 
-## Créditos y licencia
+## Credits and license
 
-La organización por skills y el enfoque de presentación toman como referencia el repo [Taste Skill de Leonxlnx](https://github.com/Leonxlnx/taste-skill). Este proyecto no incluye código, capturas ni bibliotecas de Taste y no está afiliado a ese proyecto.
+The skill-folder organization and presentation were informed by [Leonxlnx's Taste Skill](https://github.com/Leonxlnx/taste-skill). This project includes no Taste code, screenshots, or reference collection and is not affiliated with it.
 
-Código e instrucciones bajo [MIT](LICENSE). Las imágenes de cada biblioteca conservan sus derechos y condiciones originales; la licencia de este repo no las incluye.
+Code and instructions are [MIT licensed](LICENSE). Library images retain their original rights and terms; this repository's license does not cover them.

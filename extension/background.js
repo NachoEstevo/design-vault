@@ -45,7 +45,7 @@ chrome.runtime.onMessage.addListener((message, sender, respond) => {
   ) {
     respond({
       ok: false,
-      error: { code: "INVALID_MESSAGE", message: "Solicitud no permitida" },
+      error: { code: "INVALID_MESSAGE", message: "Request not allowed" },
     });
     return false;
   }

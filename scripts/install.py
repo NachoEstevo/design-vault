@@ -11,17 +11,17 @@ import shutil
 def install(vault_root, skills_root=None):
     vault = Path(vault_root).expanduser().resolve(strict=True)
     if not vault.is_dir():
-        raise ValueError("La raíz del vault debe ser una carpeta")
+        raise ValueError("Vault root must be a directory")
     codex = Path(os.environ.get("CODEX_HOME") or Path.home() / ".codex").expanduser()
     target_root = Path(skills_root).expanduser() if skills_root else codex / "skills"
     destination = target_root.resolve() / "design-vault"
     if destination.exists() or destination.is_symlink():
-        raise FileExistsError("La skill ya existe; se preservó la instalación. Revisá los cambios antes de actualizar.")
+        raise FileExistsError("The skill already exists and was preserved. Review changes before updating.")
     source = Path(__file__).resolve().parents[1] / "skills" / "design-vault"
     required = [source / name for name in ("SKILL.md", "agents", "references", "scripts", "vault.example.json")]
     for resource in required:
         if not resource.exists():
-            raise FileNotFoundError(f"Falta un recurso de instalación: {resource.name}")
+            raise FileNotFoundError(f"Missing installation resource: {resource.name}")
     # Never copy local config, caches, sessions or arbitrary files from the source skill.
     destination.mkdir(parents=True)
     shutil.copy2(source / "SKILL.md", destination / "SKILL.md")
@@ -40,15 +40,15 @@ def install(vault_root, skills_root=None):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--vault-root", required=True, help="Carpeta local exportada por Design Shelf")
-    parser.add_argument("--skills-root", help="Carpeta de skills del agente; por defecto CODEX_HOME/skills")
+    parser.add_argument("--vault-root", required=True, help="Local library exported by Design Shelf")
+    parser.add_argument("--skills-root", help="Agent skills directory; defaults to CODEX_HOME/skills")
     args = parser.parse_args()
     try:
         destination = install(args.vault_root, args.skills_root)
     except (OSError, ValueError) as error:
         parser.exit(1, f"{error}\n")
-    print(f"Design Vault instalada en: {destination}")
-    print("No se leyeron ni subieron imágenes. Reiniciá la sesión del agente si es necesario.")
+    print(f"Design Vault installed at: {destination}")
+    print("No images were read or uploaded. Start a new agent session if needed.")
 
 
 if __name__ == "__main__":

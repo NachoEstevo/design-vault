@@ -16,7 +16,7 @@ async function message(type, data = {}) {
   if (!response?.ok)
     throw new Error(
       response?.error?.message ||
-        "La extensión no pudo completar la operación. Probá recargarla.",
+        "The extension could not complete this action. Try reloading it.",
     );
   return response.result;
 }
@@ -51,7 +51,7 @@ function renderCategories() {
     choices.set(reference.category.id, reference.category.label);
   $("categories").replaceChildren();
   for (const [id, label, count] of [
-    ["", "Todas", items.length],
+    ["", "All", items.length],
     ...Array.from(choices, ([id, label]) => [id, label, counts.get(id) || 0]),
   ]) {
     const button = document.createElement("button");
@@ -87,15 +87,15 @@ function renderGallery() {
   );
   $("gallery").replaceChildren();
   $("results-label").textContent = filtered.length
-    ? `${filtered.length} ${filtered.length === 1 ? "referencia" : "referencias"} · ordenadas por fecha`
+    ? `${filtered.length} ${filtered.length === 1 ? "reference" : "references"} · sorted by date`
     : "";
   $("empty").hidden = filtered.length > 0;
   $("empty-help").textContent =
     query || currentCategory
-      ? "No hay referencias con estos filtros. Probá otra búsqueda."
+      ? "No references match these filters. Try another search."
       : folder
-        ? "Dale like a un post con imágenes en X y guardá tu primera referencia."
-        : "Conectá una carpeta, abrí X y dale like a un post con imágenes.";
+        ? "Like a post with images on X to save your first reference."
+        : "Connect a folder, open X, and like a post with images.";
   $("load-more").hidden = filtered.length <= visibleLimit;
   const urls = galleryUrls;
   for (const item of filtered.slice(0, visibleLimit)) {
@@ -105,7 +105,7 @@ function renderGallery() {
     card.className = "reference-card";
     const image = document.createElement("img");
     image.className = "reference-thumb";
-    image.alt = `Referencia: ${r.category.label}`;
+    image.alt = `Reference: ${r.category.label}`;
     image.loading = "lazy";
     const info = document.createElement("span");
     info.className = "reference-info";
@@ -114,7 +114,7 @@ function renderGallery() {
       ["reference-note", r.note],
       [
         "reference-author",
-        `${r.author || "Post de X"} · ${new Date(r.capturedAt).toLocaleDateString("es-AR")}`,
+        `${r.author || "X post"} · ${new Date(r.capturedAt).toLocaleDateString("en-US")}`,
       ],
     ]) {
       const part = document.createElement("span");
@@ -134,7 +134,7 @@ function renderGallery() {
         image.src = url;
       })
       .catch(() => {
-        image.alt = "Imagen no disponible en la carpeta";
+        image.alt = "Image not available in the folder";
       });
   }
   // An earlier asynchronous image read may finish after this render. Its URL is
@@ -146,7 +146,7 @@ async function openDetails(item) {
   detailUrls = [];
   const urls = detailUrls;
   const r = item.reference;
-  $("detail-heading").textContent = r.author || "Referencia de X";
+  $("detail-heading").textContent = r.author || "X reference";
   $("detail-category").textContent = r.category.label;
   $("detail-note").textContent = r.note;
   $("detail-tags").replaceChildren(
@@ -159,13 +159,13 @@ async function openDetails(item) {
   );
   $("detail-images").replaceChildren();
   $("detail-meta").textContent =
-    `Guardado el ${new Date(r.capturedAt).toLocaleString("es-AR")} · ${r.relativePath}`;
+    `Saved on ${new Date(r.capturedAt).toLocaleString("en-US")} · ${r.relativePath}`;
   $("detail-link").href = r.url;
   if (!$("details").open) $("details").showModal();
   for (const [index, image] of r.images.entries()) {
     if (urls !== detailUrls || !$("details").open) break;
     const img = document.createElement("img");
-    img.alt = `Imagen ${index + 1} de la referencia`;
+    img.alt = `Reference image ${index + 1}`;
     $("detail-images").append(img);
     try {
       const url = await localImage(item, image, urls);
@@ -175,7 +175,7 @@ async function openDetails(item) {
       }
       img.src = url;
     } catch {
-      img.alt = "Esta imagen no está disponible en la carpeta.";
+      img.alt = "This image is not available in the folder.";
     }
   }
 }
@@ -188,29 +188,29 @@ async function refresh() {
     settings = await message("GET_SETTINGS");
     folder = await getSetting("folder");
     $("folder-name").textContent =
-      settings.folder?.name || "Elegí dónde guardarla";
+      settings.folder?.name || "Choose a storage folder";
     $("choose-folder").firstChild.textContent = folder
-      ? "Cambiar carpeta "
-      : "Conectar carpeta ";
+      ? "Change folder "
+      : "Connect folder ";
     const downloads = settings.folder?.mode === "downloads";
     $("use-downloads").hidden = downloads;
     $("choose-folder").hidden = downloads && typeof window.showDirectoryPicker !== "function";
     $("renew-permission").hidden =
       !folder || settings.folder?.permission === "granted";
     $("folder-help").textContent = downloads
-      ? "Imágenes y notas en Descargas/Design Shelf. Sincronizá solo esa carpeta con Drive. La galería usa una copia local del navegador."
+      ? "Images and notes are saved in Downloads/Design Shelf. Sync that folder with Drive if needed. The gallery uses a private browser copy."
       : !folder
-      ? "Una carpeta tuya. Podés sincronizarla con Google Drive para escritorio."
+      ? "A folder you control. Optionally sync it with Drive for desktop."
       : settings.folder?.permission !== "granted"
-        ? "El navegador necesita que renueves el acceso para leer y guardar referencias."
-        : "Los archivos se guardan acá. Drive para escritorio puede sincronizar esta carpeta.";
+        ? "Renew folder access to read and save references."
+        : "Files are saved here. Drive for desktop can sync this folder.";
     const entries = await getEntries();
     const pending = entries.filter((entry) => entry.status === "pending");
     $("pending-panel").hidden = pending.length === 0;
     $("pending-list").replaceChildren(
       ...pending.map((entry) => {
         const li = document.createElement("li");
-        li.textContent = `${entry.reference?.note || entry.postId} — ${entry.error?.message || entry.error || "Esperando guardado"}`;
+        li.textContent = `${entry.reference?.note || entry.postId} — ${entry.error?.message || entry.error || "Waiting to save"}`;
         return li;
       }),
     );
@@ -231,7 +231,7 @@ async function refresh() {
     }
     if (warnings.length)
       status(
-        `${warnings.length} ${warnings.length === 1 ? "referencia no se pudo leer" : "referencias no se pudieron leer"}. ${warnings.slice(0, 3).join(" ")}`,
+        `${warnings.length} ${warnings.length === 1 ? "reference could not be read" : "references could not be read"}. ${warnings.slice(0, 3).join(" ")}`,
         true,
       );
     renderCategories();
@@ -246,12 +246,12 @@ async function refresh() {
 
 $("choose-folder").addEventListener("click", async () => {
   if (typeof window.showDirectoryPicker !== "function") {
-    status("Este navegador no permite elegir una carpeta. Elegí Usar Descargas para guardar en Descargas/Design Shelf.", true);
+    status("This browser cannot select a folder. Choose Use Downloads to save in Downloads/Design Shelf.", true);
     return;
   }
   if (settings.pendingCount > 0) {
     status(
-      "Reintentá los guardados pendientes antes de cambiar de carpeta.",
+      "Retry pending saves before switching folders.",
       true,
     );
     return;
@@ -266,7 +266,7 @@ $("choose-folder").addEventListener("click", async () => {
     candidateKey = `folderCandidate:${crypto.randomUUID()}`;
     await setSetting(candidateKey, selected);
     await message("SET_FOLDER", { candidateKey });
-    status("Carpeta conectada. Ya podés guardar referencias desde X.");
+    status("Folder connected. You can now save references from X.");
     await refresh();
   } catch (error) {
     if (error.name !== "AbortError") status(error.message, true);
@@ -279,7 +279,7 @@ $("use-downloads").addEventListener("click", async () => {
   try {
     await message("USE_DOWNLOADS");
     await refresh();
-    status("Destino listo: Descargas/Design Shelf. Ya podés guardar desde X.");
+    status("Downloads/Design Shelf is ready. You can now save from X.");
   } catch (error) {
     status(error.message, true);
   } finally {
@@ -292,8 +292,8 @@ $("renew-permission").addEventListener("click", async () => {
     const permission = await folder.requestPermission({ mode: "readwrite" });
     status(
       permission === "granted"
-        ? "Acceso renovado. Podés reintentar tus pendientes."
-        : "No se concedió acceso a la carpeta.",
+        ? "Access renewed. You can retry pending saves."
+        : "Folder access was not granted.",
       permission !== "granted",
     );
     await refresh();
@@ -303,14 +303,14 @@ $("renew-permission").addEventListener("click", async () => {
 });
 $("retry-pending").addEventListener("click", async () => {
   $("retry-pending").disabled = true;
-  status("Reintentando guardados…");
+  status("Retrying saves…");
   try {
     await message("RETRY_PENDING");
     await refresh();
     status(
       settings.pendingCount
-        ? "Todavía hay referencias pendientes. Revisá el error y el acceso a la carpeta."
-        : "Todos los guardados pendientes se completaron.",
+        ? "Some saves are still pending. Check the error and folder access."
+        : "All pending saves are complete.",
       settings.pendingCount > 0,
     );
   } catch (error) {

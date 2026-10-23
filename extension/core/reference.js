@@ -2,23 +2,23 @@ export const DEFAULT_CATEGORIES = [
   "Cards",
   "Landings",
   "Dashboards",
-  "Colores",
-  "Tipografía",
-  "Componentes",
+  "Colors",
+  "Typography",
+  "Components",
   "Layouts",
-  "Ilustraciones",
+  "Illustrations",
   "Branding",
-  "Otros",
+  "Other",
 ].map(normalizeCategory);
 function string(value, max, name) {
   if (typeof value !== "string" || value.length > max)
-    throw new Error(`${name} inválido`);
+    throw new Error(`${name} is invalid`);
   return value.trim();
 }
 export function normalizeCategory(label) {
-  label = string(label, 80, "Categoría");
+  label = string(label, 80, "Category");
   if (!label || /[\\/<>:"|?*\x00-\x1f]/.test(label) || label.includes(".."))
-    throw new Error("Categoría insegura");
+    throw new Error("Unsafe category");
   const id = label
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
@@ -26,7 +26,7 @@ export function normalizeCategory(label) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
   if (!id || /^(con|prn|aux|nul|com[0-9]|lpt[0-9])$/.test(id))
-    throw new Error("Categoría inválida");
+    throw new Error("Invalid category");
   return { id, label };
 }
 export function normalizeImageUrl(value) {
@@ -34,7 +34,7 @@ export function normalizeImageUrl(value) {
   try {
     u = new URL(value);
   } catch {
-    throw new Error("URL de imagen inválida");
+    throw new Error("Invalid image URL");
   }
   if (
     u.protocol !== "https:" ||
@@ -44,7 +44,7 @@ export function normalizeImageUrl(value) {
     u.password ||
     !/^\/media\/[A-Za-z0-9_-]+(?:\.(?:jpg|jpeg|png|webp))?$/.test(u.pathname)
   )
-    throw new Error("URL de imagen inválida");
+    throw new Error("Invalid image URL");
   u.hash = "";
   const format = u.searchParams.get("format");
   u.search = "";
@@ -55,12 +55,12 @@ export function normalizeImageUrl(value) {
 }
 export function normalizeReference(input, now = new Date()) {
   if (!input || typeof input !== "object")
-    throw new Error("Referencia inválida");
+    throw new Error("Invalid reference");
   let u;
   try {
     u = new URL(input.url);
   } catch {
-    throw new Error("URL inválida");
+    throw new Error("Invalid URL");
   }
   const match = u.pathname.match(
     /^\/([A-Za-z0-9_]+)\/status\/([1-9][0-9]{0,24})\/?$/,
@@ -75,34 +75,34 @@ export function normalizeReference(input, now = new Date()) {
     u.password ||
     !match
   )
-    throw new Error("Post inválido");
+    throw new Error("Invalid post");
   const postId = match[2];
   if (input.postId !== undefined && String(input.postId) !== postId)
-    throw new Error("ID inconsistente");
-  const note = string(input.note, 10000, "Nota");
-  if (!note) throw new Error("La nota es obligatoria");
+    throw new Error("Inconsistent ID");
+  const note = string(input.note, 10000, "Note");
+  if (!note) throw new Error("A note is required");
   const category = normalizeCategory(
     typeof input.category === "string" ? input.category : input.category?.label,
   );
   if (input.category?.id && input.category.id !== category.id)
-    throw new Error("Categoría inconsistente");
+    throw new Error("Inconsistent category");
   if (
     !Array.isArray(input.images) ||
     input.images.length < 1 ||
     input.images.length > 4
   )
-    throw new Error("Elegí entre 1 y 4 imágenes");
+    throw new Error("Choose between 1 and 4 images");
   const images = input.images.map((i) => ({
     sourceUrl: normalizeImageUrl(typeof i === "string" ? i : i.sourceUrl),
   }));
   if (new Set(images.map((i) => i.sourceUrl)).size !== images.length)
-    throw new Error("Imágenes duplicadas");
+    throw new Error("Duplicate images");
   if (input.tags !== undefined && !Array.isArray(input.tags))
-    throw new Error("Etiquetas inválidas");
-  if ((input.tags || []).length > 30) throw new Error("Demasiadas etiquetas");
+    throw new Error("Invalid tags");
+  if ((input.tags || []).length > 30) throw new Error("Too many tags");
   const tags = [
     ...new Set(
-      (input.tags || []).map((t) => string(t, 80, "Etiqueta")).filter(Boolean),
+      (input.tags || []).map((t) => string(t, 80, "Tag")).filter(Boolean),
     ),
   ];
   const capturedAt = now.toISOString();
@@ -110,8 +110,8 @@ export function normalizeReference(input, now = new Date()) {
     schemaVersion: 1,
     postId,
     url: `https://x.com/${match[1]}/status/${postId}`,
-    author: string(input.author || match[1], 200, "Autor"),
-    text: string(input.text || "", 20000, "Texto"),
+    author: string(input.author || match[1], 200, "Author"),
+    text: string(input.text || "", 20000, "Text"),
     capturedAt,
     note,
     category,

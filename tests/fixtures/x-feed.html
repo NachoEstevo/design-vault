@@ -56,11 +56,11 @@
           ><time datetime="2026-10-09T12:00:00Z">Oct 9</time></a
         >
         <div data-testid="tweetText">
-          Una referencia de composición para mi próximo dashboard.
+          A composition reference for my next dashboard.
         </div>
         <div data-testid="tweetPhoto">
           <img
-            alt="Card de diseño de prueba"
+            alt="Synthetic design card"
             src="https://pbs.twimg.com/media/TestShelfOne?format=png&name=small"
           />
         </div>
@@ -75,7 +75,7 @@
           </div>
         </blockquote>
         <div role="group">
-          <button data-testid="like" aria-label="Me gusta" type="button">
+          <button data-testid="like" aria-label="Like" type="button">
             ♡ Like
           </button>
         </div>
@@ -83,15 +83,15 @@
       <article data-testid="tweet" id="secondary">
         <div data-testid="User-Name">@second</div>
         <a href="/second/status/22345678901"><time>Oct 9</time></a>
-        <div data-testid="tweetText">Otra card.</div>
+        <div data-testid="tweetText">Another card.</div>
         <div data-testid="tweetPhoto">
           <img
-            alt="Segunda card"
+            alt="Second card"
             src="https://pbs.twimg.com/media/TestShelfTwo?format=png&name=small"
           />
         </div>
         <div role="group">
-          <button data-testid="like" aria-label="Me gusta" type="button">
+          <button data-testid="like" aria-label="Like" type="button">
             ♡ Like
           </button>
         </div>
@@ -99,9 +99,9 @@
       <article data-testid="tweet" id="text-only">
         <div data-testid="User-Name">@text</div>
         <a href="/text/status/32345678901"><time>Oct 9</time></a>
-        <div data-testid="tweetText">Un post sin imágenes.</div>
+        <div data-testid="tweetText">A post without images.</div>
         <div role="group">
-          <button data-testid="like" aria-label="Me gusta" type="button">
+          <button data-testid="like" aria-label="Like" type="button">
             ♡ Like
           </button>
         </div>
@@ -118,7 +118,7 @@
           button.textContent = liked ? "♥ Liked" : "♡ Like";
           button.setAttribute(
             "aria-label",
-            liked ? "Ya no me gusta" : "Me gusta",
+            liked ? "Unlike" : "Like",
           );
           if (button.dataset.fixtureRerender) {
             const article = button.closest("article");

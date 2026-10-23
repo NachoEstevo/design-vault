@@ -7,7 +7,7 @@
     if (!stylesheet) {
       const response = await fetch(chrome.runtime.getURL("content/modal.css"));
       if (!response.ok)
-        throw new Error("No se pudo cargar el modal. Recargá la extensión.");
+        throw new Error("Could not load the capture modal. Reload the extension.");
       const sheet = new CSSStyleSheet();
       sheet.replaceSync(await response.text());
       stylesheet = sheet;
@@ -45,15 +45,13 @@
     const form = element("form");
     form.noValidate = false;
     const heading = element("header");
-    const brand = element("span", "ds.", "brand-mark");
     const copy = element("div");
-    copy.append(element("p", "DESIGN SHELF", "eyebrow"));
-    const title = element("h2", "Guardá lo que te inspira.");
+    const title = element("h2", "Save a reference");
     title.id = "ds-heading";
     copy.append(title);
     const close = button("×", "close");
-    close.setAttribute("aria-label", "Omitir y cerrar");
-    heading.append(brand, copy, close);
+    close.setAttribute("aria-label", "Skip and close");
+    heading.append(copy, close);
     form.append(heading);
     const source = element(
       "p",
@@ -68,11 +66,11 @@
       const input = element("input");
       input.type = "checkbox";
       input.checked = true;
-      input.setAttribute("aria-label", `Guardar imagen ${index + 1}`);
+      input.setAttribute("aria-label", `Save image ${index + 1}`);
       checks.push(input);
       const preview = element("img");
       preview.src = image.sourceUrl;
-      preview.alt = `Imagen ${index + 1} del post`;
+      preview.alt = `Post image ${index + 1}`;
       preview.referrerPolicy = "no-referrer";
       label.append(
         preview,
@@ -84,7 +82,7 @@
     form.append(images);
     const noteLabel = element(
       "label",
-      "¿Qué te gustó de esta referencia?",
+      "What would you like to remember?",
       "field",
     );
     noteLabel.htmlFor = "ds-note";
@@ -95,11 +93,11 @@
     note.maxLength = 10000;
     note.rows = 3;
     note.placeholder =
-      "La jerarquía, los colores, ese detalle que querés recordar…";
+      "The layout, colors, or detail worth keeping…";
     noteLabel.append(note);
     form.append(noteLabel);
     const row = element("div", undefined, "field-row");
-    const categoryLabel = element("label", "Carpeta", "field");
+    const categoryLabel = element("label", "Folder", "field");
     categoryLabel.htmlFor = "ds-category";
     const select = element("select");
     select.id = "ds-category";
@@ -116,27 +114,27 @@
     }
     categoryOptions();
     categoryLabel.append(select);
-    const add = button("+ Crear carpeta", "text-button");
+    const add = button("+ New category", "text-button");
     categoryLabel.append(add);
-    const tagsLabel = element("label", "Etiquetas", "field");
+    const tagsLabel = element("label", "Tags", "field");
     tagsLabel.htmlFor = "ds-tags";
     const tags = element("input");
     tags.id = "ds-tags";
     tags.placeholder = "minimal, dark, pricing";
     tags.maxLength = 2000;
-    tagsLabel.append(tags, element("small", "Separadas por comas.", "hint"));
+    tagsLabel.append(tags, element("small", "Separate with commas.", "hint"));
     row.append(categoryLabel, tagsLabel);
     form.append(row);
-    const quickLabel = element("p", "Me interesa:", "quick-label");
+    const quickLabel = element("p", "Useful for", "quick-label");
     form.append(quickLabel);
     const quick = element("div", undefined, "quick");
     const chosen = new Set();
     for (const tag of [
-      "Composición",
+      "Composition",
       "Color",
-      "Tipografía",
-      "Espaciado",
-      "Interacción",
+      "Typography",
+      "Spacing",
+      "Interaction",
     ]) {
       const chip = button(tag, "chip");
       chip.setAttribute("aria-pressed", "false");
@@ -154,10 +152,10 @@
     const newCategory = element("div", undefined, "new-category");
     newCategory.hidden = true;
     const newName = element("input");
-    newName.placeholder = "Nombre de la nueva carpeta";
+    newName.placeholder = "New category name";
     newName.maxLength = 80;
-    newName.setAttribute("aria-label", "Nombre de la nueva carpeta");
-    const create = button("Crear", "secondary");
+    newName.setAttribute("aria-label", "New category name");
+    const create = button("Create", "secondary");
     newCategory.append(newName, create);
     form.append(newCategory);
     const feedback = element("p", undefined, "feedback");
@@ -167,16 +165,16 @@
     const folder = element("p", undefined, "folder");
     const library = button(
       options.settings.folder
-        ? `↗ ${options.settings.folder.name}`
-        : "Conectar mi carpeta",
+        ? options.settings.folder.name
+        : "Connect my folder",
       "text-button",
     );
     folder.append(
       element(
         "span",
         options.settings.folder
-          ? "Se guarda en "
-          : "Primero elegí dónde guardar. ",
+          ? "Save to "
+          : "Choose where to save first. ",
       ),
       library,
     );
@@ -186,10 +184,10 @@
       options.settings.folder
     )
       feedback.textContent =
-        "El acceso a la carpeta necesita renovarse. Podés conservar el guardado pendiente y reintentarlo desde la biblioteca.";
+        "Folder access needs renewal. Your save can stay pending until you retry it from the library.";
     const footer = element("footer");
-    const skip = button("Omitir", "secondary");
-    const save = button("Guardar referencia ↗", "primary");
+    const skip = button("Skip", "secondary");
+    const save = button("Save reference", "primary");
     save.type = "submit";
     footer.append(skip, save);
     form.append(footer);
@@ -213,7 +211,7 @@
       quick.querySelectorAll("button").forEach((b) => {
         b.disabled = locked;
       });
-      save.textContent = locked ? "Guardando…" : "Guardar referencia ↗";
+      save.textContent = locked ? "Saving…" : "Save reference";
     }
     add.addEventListener("click", () => {
       newCategory.hidden = !newCategory.hidden;
@@ -221,7 +219,7 @@
     });
     create.addEventListener("click", async () => {
       if (!newName.value.trim()) {
-        feedback.textContent = "Escribí un nombre para la carpeta.";
+        feedback.textContent = "Enter a category name.";
         newName.focus();
         return;
       }
@@ -233,7 +231,7 @@
         categories.splice(0, categories.length, ...result.categories);
         categoryOptions(result.category.id);
         newCategory.hidden = true;
-        feedback.textContent = "Carpeta creada.";
+        feedback.textContent = "Category created.";
         select.focus();
       } catch (error) {
         feedback.textContent = error.message;
@@ -275,23 +273,23 @@
       const selected = post.images.filter((_, index) => checks[index].checked);
       if (!note.value.trim()) {
         feedback.textContent =
-          "Escribí qué te gustó para guardar esta referencia.";
+          "Add a note before saving this reference.";
         note.focus();
         return;
       }
       if (!selected.length) {
-        feedback.textContent = "Elegí al menos una imagen.";
+        feedback.textContent = "Select at least one image.";
         return;
       }
       lock(true);
       feedback.classList.remove("error");
-      feedback.textContent = "Descargando imágenes y guardando tu nota…";
+      feedback.textContent = "Downloading images and saving your note…";
       try {
         // Folder setup can happen in the library while this draft stays open.
         options.settings = await options.onRefreshSettings();
         if (!options.settings.folder)
           throw new Error(
-            "Conectá una carpeta desde la biblioteca y volvé a guardar.",
+            "Connect a folder in the library, then save again.",
           );
         const result = await options.onSave({
           ...post,
@@ -309,14 +307,14 @@
           images: selected,
         });
         if (!["saved", "duplicate", "pending"].includes(result.status))
-          throw new Error("Respuesta de guardado inválida.");
+          throw new Error("Invalid save response.");
         dialog.close();
         notify(
           result.status === "saved"
-            ? "Referencia guardada en tu biblioteca."
+            ? "Reference saved to your library."
             : result.status === "duplicate"
-              ? "Este post ya estaba en tu biblioteca."
-              : `Referencia pendiente. ${result.error || "Reintentá desde la biblioteca."}`,
+              ? "This post is already in your library."
+              : `Save pending. ${result.error || "Retry from the library."}`,
           result.status === "pending",
         );
       } catch (error) {

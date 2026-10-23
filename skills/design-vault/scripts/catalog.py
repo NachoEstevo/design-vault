@@ -28,14 +28,14 @@ def signature(path):
 
 def read_json(path, maximum=256 * 1024):
     if path.stat().st_size > maximum:
-        raise ValueError("JSON demasiado grande")
+        raise ValueError("JSON is too large")
     return json.loads(path.read_text(encoding="utf-8-sig"))
 
 
 def contained(root, path):
     resolved = path.resolve()
     if not resolved.is_relative_to(root) or resolved == root:
-        raise ValueError("Ruta fuera del vault")
+        raise ValueError("Path is outside the vault")
     return resolved
 
 
@@ -51,7 +51,7 @@ def safe_name(name, mime):
 
 def text(value, maximum):
     if not isinstance(value, str) or len(value) > maximum:
-        raise ValueError("Texto inválido")
+        raise ValueError("Invalid text")
     return value.strip()
 
 
@@ -74,12 +74,12 @@ class Catalog:
     def __init__(self, root, cache=None):
         self.root = Path(root).expanduser().resolve()
         if not self.root.is_dir():
-            raise ValueError(f"No existe la biblioteca configurada: {self.root}")
+            raise ValueError(f"Configured library does not exist: {self.root}")
         identity = hashlib.sha256(str(self.root).encode()).hexdigest()[:16]
         default = Path(os.environ.get("LOCALAPPDATA", Path.home() / ".cache")) / "DesignVault" / identity
         self.cache = Path(cache).expanduser().resolve() if cache else default
         if self.cache.is_relative_to(self.root):
-            raise ValueError("La caché SQLite debe quedar fuera del vault sincronizado")
+            raise ValueError("SQLite cache must stay outside the synchronized vault")
         self.cache.mkdir(parents=True, exist_ok=True)
         self.db = sqlite3.connect(self.cache / "catalog.sqlite3")
         self.db.row_factory = sqlite3.Row
@@ -94,7 +94,7 @@ class Catalog:
         old = self.db.execute("SELECT value FROM config WHERE key='root'").fetchone()
         if old and old[0] != str(self.root):
             self.db.close()
-            raise ValueError("Esta caché pertenece a otra biblioteca; elegí otra ruta de caché")
+            raise ValueError("This cache belongs to another library; choose another cache directory")
         self.db.execute("INSERT OR IGNORE INTO config VALUES ('root', ?)", (str(self.root),))
         self.db.commit()
         self.stats = {}
@@ -116,19 +116,19 @@ class Catalog:
 
     def observation_path(self, image_id):
         if not re.fullmatch(r"[1-9][0-9]{0,24}:[0-3]", image_id):
-            raise ValueError("ID de imagen inválido")
+            raise ValueError("Invalid image ID")
         return contained(self.root, self.root / "_design-vault" / "descriptions" /
                          (image_id.replace(":", "-") + ".json"))
 
     def reference_images(self, path, value):
         if not isinstance(value, dict) or value.get("schemaVersion") != 1:
-            raise ValueError("Esquema de referencia inválido")
+            raise ValueError("Invalid reference schema")
         post_id = str(value.get("postId", ""))
         if not re.fullmatch(r"[1-9][0-9]{0,24}", post_id):
-            raise ValueError("ID de post inválido")
+            raise ValueError("Invalid post ID")
         category = value.get("category", {})
         if not isinstance(category, dict) or not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", str(category.get("id", ""))):
-            raise ValueError("Categoría inválida")
+            raise ValueError("Invalid category")
         date = datetime.fromisoformat(text(value.get("capturedAt"), 64).replace("Z", "+00:00"))
         relative = f"{category['id']}/{date.date().isoformat()}_{post_id}"
         if value.get("relativePath") != relative or path.parent.relative_to(self.root).as_posix() != relative:
@@ -137,28 +137,28 @@ class Catalog:
         parsed = urlparse(url)
         if (parsed.scheme != "https" or parsed.netloc not in {"x.com", "twitter.com"} or
                 not re.fullmatch(r"/[A-Za-z0-9_]+/status/" + post_id, parsed.path)):
-            raise ValueError("Enlace de post inválido")
+            raise ValueError("Invalid post link")
         note = text(value.get("note"), 10000)
         if not note:
             raise ValueError("Referencia sin nota")
         tags = value.get("tags", [])
         if not isinstance(tags, list) or len(tags) > 30:
-            raise ValueError("Etiquetas inválidas")
+            raise ValueError("Invalid tags")
         tags = [text(tag, 80) for tag in tags]
         images = value.get("images")
         if not isinstance(images, list) or not 1 <= len(images) <= 4:
-            raise ValueError("Lista de imágenes inválida")
+            raise ValueError("Invalid image list")
         result, names = [], set()
         for index, image in enumerate(images):
             if not isinstance(image, dict) or not safe_name(image.get("fileName"), image.get("mimeType")):
-                raise ValueError("Nombre o tipo de imagen inválido")
+                raise ValueError("Invalid image name or type")
             name = image["fileName"]
             if name.casefold() in names:
-                raise ValueError("Nombre de imagen repetido")
+                raise ValueError("Duplicate image filename")
             names.add(name.casefold())
             file = contained(self.root, path.parent / name)
             if not file.is_file() or not 0 < file.stat().st_size <= MAX_IMAGE_BYTES:
-                raise ValueError("Imagen ausente, vacía o demasiado grande")
+                raise ValueError("Image is missing, empty, or too large")
             result.append({"id": f"{post_id}:{index}", "post_id": post_id,
                            "path": str(file), "signature": signature(file), "category": category["id"],
                            "note": note, "tags": tags, "url": url, "captured_at": value["capturedAt"],
@@ -191,11 +191,11 @@ class Catalog:
                             if (isinstance(payload, dict) and payload.get("schemaVersion") == ANALYSIS_VERSION and payload.get("image_id") == image["id"] and
                                     payload.get("signature") == image["signature"]):
                                 if not re.fullmatch(r"[a-f0-9]{64}", str(payload.get("sha256", ""))):
-                                    raise ValueError("Hash de análisis inválido")
+                                    raise ValueError("Invalid observation hash")
                                 image["analysis"] = validate_observation(payload["observation"])
                                 image["hash"] = payload["sha256"]
                         except (ValueError, KeyError, TypeError, OSError) as error:
-                            self.warn(stats, f"{image['id']}: análisis ignorado ({error})")
+                            self.warn(stats, f"{image['id']}: observation ignored ({error})")
                     serialized = json.dumps(image, ensure_ascii=False, sort_keys=True)
                     previous = self.db.execute("SELECT data FROM images WHERE id=?", (image["id"],)).fetchone()
                     if not previous or previous[0] != serialized:
@@ -231,11 +231,11 @@ class Catalog:
     def image(self, image_id):
         row = self.db.execute("SELECT data FROM images WHERE id=?", (image_id,)).fetchone()
         if not row:
-            raise ValueError(f"Imagen no disponible: {image_id}")
+            raise ValueError(f"Image unavailable: {image_id}")
         image = json.loads(row[0])
         path = contained(self.root, Path(image["path"]))
         if signature(path) != image["signature"]:
-            raise ValueError("La imagen cambió durante la operación; volvé a buscar")
+            raise ValueError("The image changed during this operation; search again")
         return image
 
     def describe(self, image_id, observation):
@@ -244,12 +244,12 @@ class Catalog:
         file = Path(image["path"])
         sha256 = hashlib.sha256(file.read_bytes()).hexdigest()
         if signature(file) != image["signature"]:
-            raise ValueError("La imagen cambió durante el análisis")
+            raise ValueError("The image changed during analysis")
         path = self.observation_path(image_id)
         if path.exists():
             previous = read_json(path)
             if not isinstance(previous, dict) or previous.get("image_id") != image_id or previous.get("schemaVersion") != ANALYSIS_VERSION:
-                raise ValueError("Se preservó un archivo de análisis ajeno")
+                raise ValueError("An unowned observation file was preserved")
         atomic_json(path, {"schemaVersion": ANALYSIS_VERSION, "image_id": image_id,
                            "signature": image["signature"], "sha256": sha256,
                            "observation": observation})
@@ -259,14 +259,14 @@ class Catalog:
 
 def validate_observation(value):
     if not isinstance(value, dict):
-        raise ValueError("Observación inválida")
+        raise ValueError("Invalid observation")
     result = {"summary": text(value.get("summary"), 1200)}
     if len(result["summary"]) < 10:
-        raise ValueError("Describí lo observado, con al menos diez caracteres")
+        raise ValueError("Describe what you observed using at least ten characters")
     for field in ("style", "palette", "components"):
         values = value.get(field, [])
         if not isinstance(values, list) or len(values) > 20:
-            raise ValueError(f"{field} inválido")
+            raise ValueError(f"{field} is invalid")
         result[field] = [text(item, 100) for item in values]
     for field in ("typography", "uncertainty"):
         result[field] = text(value.get(field, ""), 600)

@@ -17,12 +17,12 @@ async function completed(api, id) {
   const deadline = Date.now() + 60000;
   do {
     const [item] = await api.search({ id });
-    if (!item) throw new Error("No se encuentra la descarga. Conservamos la referencia para reintentar.");
+    if (!item) throw new Error("Download not found. The reference is preserved for retry.");
     if (item.state === "complete") return item;
-    if (item.state === "interrupted") throw new Error(`Descarga interrumpida: ${item.error || "error de archivo"}. Reintentá desde la biblioteca.`);
+    if (item.state === "interrupted") throw new Error(`Download interrupted: ${item.error || "file error"}. Retry from the library.`);
     await new Promise(resolve => setTimeout(resolve, 250));
   } while (Date.now() < deadline);
-  throw new Error("La descarga sigue pendiente. Revisá las descargas de Brave y reintentá.");
+  throw new Error("The download is still pending. Check Brave downloads and retry.");
 }
 
 export async function exportReferenceDownloads(root, entry, checkpoint, api = chrome.downloads) {
@@ -43,7 +43,7 @@ export async function exportReferenceDownloads(root, entry, checkpoint, api = ch
       const candidates = await api.search({ filenameRegex: suffixPattern(filename), startedAfter: record.startedAt });
       const extensionId = globalThis.chrome?.runtime?.id;
       const own = candidates.filter(item => !extensionId || item.byExtensionId === extensionId);
-      if (own.length > 1) throw new Error("Hay varias descargas para este archivo. Revisá el conflicto antes de reintentar.");
+      if (own.length > 1) throw new Error("Multiple downloads match this file. Check the conflict before retrying.");
       record.id = own[0]?.id;
     }
     if (record.id) {
@@ -61,23 +61,23 @@ export async function exportReferenceDownloads(root, entry, checkpoint, api = ch
     }
     await checkpoint(entry);
     const item = await completed(api, record.id);
-    if (item.exists === false) throw new Error("El archivo descargado ya no está en disco. Revisá la carpeta antes de reintentar.");
+    if (item.exists === false) throw new Error("The downloaded file is missing from disk. Check the folder before retrying.");
     const actualPath = item.filename.replaceAll("\\", "/");
     const split = actualPath.lastIndexOf("/");
     const actualDirectory = actualPath.slice(0, split);
     const actualName = actualPath.slice(split + 1);
     if (!actualDirectory.endsWith(`/Design Shelf/${reference.relativePath}`))
-      throw new Error("El archivo se guardó en otra carpeta. Conservamos el pendiente; revisá el destino de la descarga.");
+      throw new Error("The file was saved in another folder. The save remains pending; check the download destination.");
     const rootPath = actualDirectory.slice(0, -(`/${reference.relativePath}`).length);
     if (entry.downloadPath && entry.downloadPath.replaceAll("\\", "/") !== rootPath)
-      throw new Error("Los archivos se guardaron en carpetas de Descargas diferentes. Revisá el destino antes de reintentar.");
+      throw new Error("Files were saved in different Downloads folders. Check the destination before retrying.");
     const imageIndex = reference.images.findIndex(image => image.fileName === name);
     if (imageIndex >= 0) {
       if (!isSafeImageFileName(actualName, reference.images[imageIndex].mimeType))
-        throw new Error("El nombre de la imagen no es válido para su formato. Revisá la descarga antes de reintentar.");
+        throw new Error("The image filename does not match its format. Check the download before retrying.");
       diskReference.images[imageIndex].fileName = actualName;
     } else if (actualName !== name) {
-      throw new Error(`El archivo ${name} debe conservar su nombre para leer la biblioteca. Se guardó como ${actualName}; revisá la carpeta antes de reintentar.`);
+      throw new Error(`The library needs the original filename ${name}. It was saved as ${actualName}; check the folder before retrying.`);
     }
     entry.downloadPath = rootPath;
     record.fileName = actualName;

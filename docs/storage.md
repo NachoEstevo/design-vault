@@ -1,45 +1,47 @@
-# Dónde guardar los archivos
+# Where files belong
 
-| Material | Destino |
+| Material | Destination |
 | --- | --- |
-| Skills, extensión, scripts, pruebas y documentación | GitHub público. |
-| Originales, notas, `reference.json`, análisis personales | Carpeta privada local; Drive o R2 privado como opciones separadas. |
-| SQLite, miniaturas e historial de sesiones | Caché local, fuera de la carpeta sincronizada. |
-| Assets generados para un proyecto | Carpeta del proyecto. Publicarlos solo según ese proyecto. |
-| Credenciales o configuración real | Fuera de Git; nunca dentro de `SKILL.md`. |
+| Skills, extension, scripts, tests, and documentation | Public GitHub repository. |
+| Originals, notes, `reference.json`, personal descriptions | Private local folder; Drive or private R2 as separate options. |
+| SQLite, thumbnails, session history | Local cache, outside synchronized folders. |
+| Project-generated assets | The project's directory and publication policy. |
+| Credentials and real configuration | Outside Git, never in `SKILL.md`. |
 
-## Local y Google Drive
+## Local storage and Google Drive
 
-Es el flujo más directo: la extensión escribe en una carpeta y la skill lee esa misma carpeta. Si usás Drive para escritorio, sincronizá la carpeta dedicada de Design Shelf. En Brave, será `<Descargas>/Design Shelf`.
+The simplest workflow: the extension writes to a folder and the skill reads that same folder. Drive for desktop can synchronize the dedicated Design Shelf directory. In Brave, this is `<Downloads>/Design Shelf`.
 
-En otro equipo, los originales deben estar disponibles localmente. La extensión y la skill no comprueban si Drive terminó de subirlos. La skill tampoco lee el almacenamiento privado del navegador.
+On another machine, originals must be available locally. Neither the extension nor the skill checks whether Drive has finished uploading. The skill does not read browser-private extension storage.
 
-## R2 privado
+## Private R2
 
-R2 puede guardar un respaldo privado. Por sí solo no crea una carpeta local ni cambia el buscador: **esta versión de la skill no consume objetos remotos**. Para diseñar desde otro equipo hay que descargar una copia local y apuntar la skill a ella.
+For the planned hosted reader and self-hosted cloud mode, see [private inspiration service](private-cloud.md). Keeping original images private while serving anyone requires server-side visual interpretation; a bucket URL or a hidden client-side image is insufficient.
 
-- Mantené deshabilitada la URL pública `r2.dev` y no conectes un dominio público al bucket personal.
-- El endpoint `https://<ACCOUNT_ID>.r2.cloudflarestorage.com` es una API S3 autenticada; el nombre del bucket se especifica por separado. No es una URL pública de imágenes.
-- No necesitás habilitar CORS para copias mediante una herramienta S3 de escritorio/CLI. CORS no convierte un bucket privado en público ni sustituye autenticación.
-- Podés subir archivos desde la pestaña **Objects** del dashboard. Para copias frecuentes conviene una herramienta S3 como rclone con un perfil privado, limitado al bucket necesario.
-- Usá copia aditiva y revisá su simulación primero. Evitá sincronizaciones que borren objetos automáticamente al faltar un archivo local.
+R2 can store a private backup. It does not create a local folder or change retrieval: **this skill version does not consume remote objects**. Download a local copy and point the skill at it before designing on another machine.
 
-Ejemplo opcional, **después de instalar rclone y configurar un remote privado llamado `vault-r2`** con proveedor Cloudflare, región `auto` y tu endpoint. Este repo no crea credenciales, instala rclone ni ejecuta una subida por defecto:
+- Keep the public `r2.dev` URL disabled and do not connect a public domain to a personal bucket.
+- `https://<ACCOUNT_ID>.r2.cloudflarestorage.com` is an authenticated S3 API endpoint; specify the bucket separately. It is not a public image URL.
+- Desktop/CLI S3 copies do not require CORS. CORS does not make private storage public or replace authentication.
+- You can upload files from the dashboard's **Objects** tab. For repeated copies, use an S3 tool such as rclone with a private profile scoped to the required bucket.
+- Preview copy operations first. Avoid synchronization that deletes remote objects when a local file disappears.
 
-```sh
-rclone copy "/ruta/a/Design Shelf" "vault-r2:design-vault/library" --exclude ".pending.json" --exclude "*.sqlite*" --exclude "*.db*" --dry-run
-```
-
-Revisá el listado; quitá `--dry-run` para subir. `copy` puede reemplazar un objeto del mismo nombre si cambió: esto es una réplica de archivos, no un historial de backups. Para una copia histórica usá un prefijo nuevo por fecha y una política de conservación decidida aparte.
-
-Restaurá a una carpeta vacía antes de conectar la skill:
+Optional example, **after installing rclone and configuring a private remote named `vault-r2`** with provider Cloudflare, region `auto`, and your endpoint. This repo does not create credentials, install rclone, or upload anything automatically:
 
 ```sh
-rclone copy "vault-r2:design-vault/library" "/ruta/a/vault-restaurado" --dry-run
+rclone copy "/path/to/Design Shelf" "vault-r2:design-vault/library" --exclude ".pending.json" --exclude "*.sqlite*" --exclude "*.db*" --dry-run
 ```
 
-Revisá y ejecutá sin `--dry-run`. Conservá la estructura de carpetas y los nombres. Los JSON de referencias y descripciones siguen siendo privados aunque los originales provengan de posts públicos. No sincronices la caché reconstruible del equipo.
+Review the file list before removing `--dry-run`. `copy` may replace an object with the same name when it changes: this is a replica, not backup history. Use a new dated prefix and a separately chosen retention policy for historical snapshots.
 
-No se incluye ningún identificador de cuenta, endpoint personal, token, perfil ni configuración real en este repo. Una URL prefirmada da acceso temporal al objeto; no debe publicarse en documentación o commits como si fuera una referencia permanente.
+Restore into an empty directory before connecting the skill:
 
-Fuentes: [API S3 de R2](https://developers.cloudflare.com/r2/api/s3/api/), [buckets públicos](https://developers.cloudflare.com/r2/buckets/public-buckets/) y [rclone con R2](https://developers.cloudflare.com/r2/examples/rclone/).
+```sh
+rclone copy "vault-r2:design-vault/library" "/path/to/restored-vault" --dry-run
+```
+
+Review and rerun without `--dry-run`. Preserve directories and filenames. Reference and description JSON remain private even when the original posts are public. Do not upload the machine's reconstructible cache.
+
+This repo contains no real account ID, personal endpoint, token, profile, or credentials. Presigned URLs grant temporary object access; do not commit them as permanent references.
+
+Sources: [R2 S3 API](https://developers.cloudflare.com/r2/api/s3/api/), [public buckets](https://developers.cloudflare.com/r2/buckets/public-buckets/), and [rclone with R2](https://developers.cloudflare.com/r2/examples/rclone/).

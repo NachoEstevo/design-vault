@@ -62,7 +62,7 @@
     if (!response?.ok)
       throw new Error(
         response?.error?.message ||
-          "La extensión se recargó. Recargá esta pestaña de X para volver a usarla.",
+          "The extension was reloaded. Reload this X tab to use it again.",
       );
     return response.result;
   }
@@ -143,7 +143,7 @@
         if (!(await waitForLike(tweet, post))) return;
         if (queue.length >= 8) {
           globalThis.DesignShelfModal.notify(
-            "Hay varias referencias abiertas. Terminá las pendientes y volvé a dar like a esta.",
+            "Several references are open. Finish them, then like this post again.",
           );
           return;
         }

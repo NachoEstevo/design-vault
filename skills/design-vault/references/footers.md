@@ -1,27 +1,27 @@
-# Footers con presencia y utilidad
+# Footers with presence and purpose
 
-El footer cierra la composición y ayuda a decidir el siguiente paso. Darle una composición propia dentro del sistema de la página: jerarquía, espacio, tipografía y contraste que lo hagan reconocible. Evitar resolverlo por defecto como una línea de copyright o como una repetición enorme del contacto anterior.
+A footer closes the composition and helps visitors choose a next step. Give it hierarchy, spacing, typography, and contrast within the page's system. Do not default to a copyright line or a huge repetition of the preceding contact section.
 
-## Elegir la composición
+## Choose a composition
 
-Partir del contenido disponible y del tipo de sitio, no de una plantilla fija. Algunas direcciones posibles:
+Start from available content and site type:
 
-- **Cierre editorial para una agencia o portfolio:** marca con presencia, contacto directo y pocos enlaces agrupados. Una palabra de marca a gran escala puede cerrar la página si es legible y se adapta al ancho; no sumar un slogan vacío para ocupar espacio.
-- **Directorio para un sitio con varias áreas:** columnas con nombres concretos (servicios, recursos, empresa), marca y contacto con una jerarquía clara. Agrupar por intención; no duplicar cada enlace del header sin evaluar su utilidad.
-- **Cierre compacto después de un contacto protagonista:** firma de marca, navegación secundaria y datos pertinentes, con ritmo y separación cuidados. No hace falta otro CTA principal ni un viewport completo.
+- **Editorial agency/portfolio ending:** a recognizable brand signature, direct contact, and a few grouped links. A large wordmark works when legible and responsive; an empty slogan does not fill missing content.
+- **Directory for a multi-area site:** clearly named columns, brand, and contact with a useful hierarchy. Group by intent rather than repeating every header link automatically.
+- **Compact ending after prominent contact:** brand signature, secondary navigation, and relevant details with deliberate spacing. Another main CTA or full viewport is unnecessary.
 
-Elegir un gesto visual compatible con la dirección: cambio de superficie o color, marca tipográfica amplia, división editorial o un asset relevante. No acumularlos por obligación. Un fondo generado puede servir si mejora ese cierre; conservar texto, enlaces y controles como elementos de interfaz. Mantener las preferencias de guidelines.md: sin overlines decorativos, puntos con leyenda, estrellas ni flechas diagonales repetidas.
+Choose a compatible gesture: a surface/color change, large typography, an editorial division, or a relevant asset. Do not stack them by obligation. A generated background may help, but text, links, and controls remain interface elements. Follow guidelines.md: no decorative overlines, dot labels, stars, or repeated diagonal arrows.
 
-## Contenido e interacción
+## Content and interaction
 
-- Priorizar una acción clara cuando el footer sea el último punto de conversión. Si la sección previa ya contiene el contacto, ofrecer un acceso breve o información complementaria sin repetir su título y formulario.
-- Usar enlaces y datos reales del proyecto. Incluir correo, redes, ubicación, disponibilidad o información legal solo si existen y aportan al visitante. No inventar un mail, perfiles, dirección, año de fundación o páginas legales para completar la grilla.
-- Mantener títulos y subtítulos alineados según las preferencias del usuario. Distribuir grupos de enlaces por columnas sí es válido; separar un título de su descripción hacia extremos opuestos no lo es. Evitar párrafos largos en el cierre.
-- Cada enlace lleva a un destino válido. No presentar texto como botón o red social si no funciona; si falta un dato necesario, resolverlo con contenido disponible o señalarlo como pendiente en la entrega.
-- Permitir una entrada breve del conjunto y feedback de los enlaces o del contacto. Evitar reveals lentos por cada enlace, marquesinas automáticas o movimiento que dificulte pulsar. Aplicar movimiento reducido y foco visible como en el resto del sitio.
+- Prioritize one clear action if this is the final conversion point. After a full contact section, offer a short route back or complementary information without repeating its heading and form.
+- Use real links and details. Include email, social profiles, location, availability, or legal information only when supplied and useful. Never invent them, founding dates, or legal pages to fill a grid.
+- Keep headings and descriptions aligned. Link columns are valid; separating a title and its description to opposite edges is not. Avoid long closing paragraphs.
+- Every link needs a valid destination. Do not present nonfunctional text as a button or social link. Use available content or disclose necessary missing details in the handoff.
+- A brief grouped entrance and useful link feedback may help. Avoid slow per-link reveals, automatic marquees, or motion that makes clicking difficult. Preserve reduced motion and visible focus.
 
-## Buscar referencias y verificar
+## Retrieve and review
 
-Si el cierre necesita inspiración, usar una sub-sesión enfocada (`footer contact navigation`, `editorial footer typography` o vocabulario acorde al proyecto), compartiendo el presupuesto visual con los demás componentes. Revisar primero si una landing ya seleccionada incluye un footer útil. Si la captura no muestra su parte inferior, no atribuirle un footer ni abrir toda la colección para encontrarlo. Si no hay cobertura, explicarlo y diseñar un cierre coherente con las referencias inspeccionadas.
+Use focused queries such as `footer contact navigation` or `editorial footer typography`, sharing the visual budget with other components. Check selected landings first. If a screenshot does not show the bottom, do not attribute a footer to it or open the whole library. Explain missing coverage and build a coherent ending from inspected references.
 
-Comprobar el footer en móvil y ultrawide con la fuente cargada: marca sin recortes accidentales, enlaces legibles, orden de lectura y tabulación lógico, contraste y separación de grupos. Contener su composición horizontalmente como el resto de la página y ajustar la altura al contenido. No imponer `100vh` al cierre ni esconder navegación en móvil solo para conservar su silueta.
+Check mobile and ultrawide with loaded fonts: no accidental wordmark clipping, readable links, logical reading/tab order, contrast, and group spacing. Contain the composition horizontally and size it to content. Do not force `100vh` or hide useful mobile navigation to preserve a silhouette.

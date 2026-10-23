@@ -21,8 +21,8 @@ for (const [command, prefix] of candidates) {
     windowsHide: true,
     shell: false,
   });
-  if (result.error) console.error(`No se pudo ejecutar Python: ${result.error.message}`);
+  if (result.error) console.error(`Could not run Python: ${result.error.message}`);
   process.exit(result.status ?? 1);
 }
-console.error("Design Vault necesita Python 3.10+. Instalalo o indicá su ejecutable en DESIGN_VAULT_PYTHON.");
+console.error("Design Vault requires Python 3.10+. Install it or set DESIGN_VAULT_PYTHON to its executable.");
 process.exit(1);

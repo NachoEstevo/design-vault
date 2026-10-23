@@ -30,7 +30,7 @@ try {
     .sort((a, b) => Number(b.split("-")[1]) - Number(a.split("-")[1]));
   if (process.platform !== "win32" || !versions.length)
     throw new Error(
-      "Instalá Chromium con npx playwright install chromium o indicá DESIGN_SHELF_CHROMIUM.",
+      "Install Chromium with npx playwright install chromium or set DESIGN_SHELF_CHROMIUM.",
     );
   executablePath = join(cache, versions[0], "chrome-win64", "chrome.exe");
 }
@@ -72,16 +72,16 @@ try {
   const id = new URL(worker.url()).host;
   const library = await context.newPage();
   await library.goto(`chrome-extension://${id}/library.html`);
-  await library.getByRole("button", { name: "Conectar carpeta" }).waitFor();
-  await library.evaluate(() => { window.showDirectoryPicker = undefined; });
-  await library.getByRole("button", { name: "Conectar carpeta" }).click();
-  await library.getByText(/no permite elegir una carpeta/).waitFor({ timeout: 3000 });
-  await library.getByRole("button", { name: "Usar Descargas" }).waitFor();
-  checks.push("Unavailable directory picker explains limitation and offers Downloads instead of TypeError");
+  await library.getByRole("button", { name: "Connect folder" }).waitFor();
   await library.screenshot({
     path: join(output, "library-empty.png"),
     fullPage: true,
   });
+  await library.evaluate(() => { window.showDirectoryPicker = undefined; });
+  await library.getByRole("button", { name: "Connect folder" }).click();
+  await library.getByText(/cannot select a folder/).waitFor({ timeout: 3000 });
+  await library.getByRole("button", { name: "Use Downloads" }).waitFor();
+  checks.push("Unavailable directory picker explains limitation and offers Downloads instead of TypeError");
   checks.push(
     "Real MV3 worker and library loaded without authenticated X actions",
   );
@@ -94,12 +94,12 @@ try {
     const dialog = feed.getByRole("dialog");
     await dialog.waitFor();
     await dialog
-      .getByRole("textbox", { name: /nota|gustó|referencia/i })
+      .getByRole("textbox", { name: /remember/i })
       .first()
-      .fill("Me interesa la jerarquía y el espaciado para un dashboard B2B.");
-    await dialog.getByRole("button", { name: /Guardar referencia/i }).click();
+      .fill("I want to remember this B2B dashboard hierarchy and spacing.");
+    await dialog.getByRole("button", { name: /Save reference/i }).click();
     await dialog
-      .getByText("Conectá una carpeta desde la biblioteca y volvé a guardar.")
+      .getByText("Connect a folder in the library, then save again.")
       .waitFor();
     assert.equal(
       (
@@ -127,17 +127,17 @@ try {
     checks.push(
       "Directory handle stored in IndexedDB and connected through real runtime message (OPFS test directory)",
     );
-    await library.getByRole("button", { name: "Actualizar" }).click();
+    await library.getByRole("button", { name: "Refresh" }).click();
     await library.getByText("test-library", { exact: true }).waitFor();
-    await dialog.getByRole("button", { name: "+ Crear carpeta" }).click();
+    await dialog.getByRole("button", { name: "+ New category" }).click();
     await dialog
-      .getByRole("textbox", { name: "Nombre de la nueva carpeta" })
+      .getByRole("textbox", { name: "New category name" })
       .fill("SaaS UI");
-    await dialog.getByRole("button", { name: "Crear", exact: true }).click();
-    await dialog.getByText("Carpeta creada.", { exact: true }).waitFor();
+    await dialog.getByRole("button", { name: "Create", exact: true }).click();
+    await dialog.getByText("Category created.", { exact: true }).waitFor();
     await dialog.locator("#ds-tags").fill("dark, B2B");
     await dialog
-      .getByRole("button", { name: "Espaciado", exact: true })
+      .getByRole("button", { name: "Spacing", exact: true })
       .click();
     await feed.screenshot({
       path: join(output, "capture-modal.png"),
@@ -148,10 +148,10 @@ try {
     const preview = await dialog.locator("img").getAttribute("src");
     assert(!preview.includes("QuotedShelf"));
     await dialog
-      .getByRole("textbox", { name: /nota|gustó|referencia/i })
+      .getByRole("textbox", { name: /remember/i })
       .first()
-      .fill("Me interesa la jerarquía y el espaciado para un dashboard B2B.");
-    const save = dialog.getByRole("button", { name: /Guardar referencia/i });
+      .fill("I want to remember this B2B dashboard hierarchy and spacing.");
+    const save = dialog.getByRole("button", { name: /Save reference/i });
     await save.click();
     await dialog.waitFor({ state: "hidden", timeout: 30000 });
     const entries = await library.evaluate(async () =>
@@ -165,7 +165,7 @@ try {
       "Quoted image must be excluded",
     );
     assert.equal(entries[0].reference.category.id, "saas-ui");
-    assert.deepEqual(entries[0].reference.tags, ["dark", "B2B", "Espaciado"]);
+    assert.deepEqual(entries[0].reference.tags, ["dark", "B2B", "Spacing"]);
     const saved = await library.evaluate(async () => {
       const root = await (await import("./core/db.js")).getSetting("folder");
       const { items } = await (
@@ -184,7 +184,7 @@ try {
       return { reference: JSON.parse(json), notes, imageSize: image.size };
     });
     assert.equal(saved.imageSize, png.length);
-    assert(saved.notes.includes("jerarquía"));
+    assert(saved.notes.includes("hierarchy"));
     assert(saved.reference.url.includes("/12345678901"));
     await writeFile(
       join(output, "saved-reference.json"),
@@ -196,7 +196,7 @@ try {
     checks.push(
       "X content creates custom category; free tags and aspect chips persist in metadata",
     );
-    await library.getByRole("button", { name: "Actualizar" }).click();
+    await library.getByRole("button", { name: "Refresh" }).click();
     await library.locator(".reference-card").waitFor();
     await library.screenshot({
       path: join(output, "library-saved.png"),
@@ -204,11 +204,11 @@ try {
     });
     await library.getByRole("searchbox").fill("no-match");
     await library.locator(".reference-card").waitFor({ state: "hidden" });
-    await library.getByRole("searchbox").fill("jerarquía");
+    await library.getByRole("searchbox").fill("hierarchy");
     await library.locator(".reference-card").click();
     await library.getByRole("dialog").waitFor();
     assert.equal(await library.getByRole("dialog").locator("img").count(), 1);
-    await library.getByRole("button", { name: "Cerrar referencia" }).click();
+    await library.getByRole("button", { name: "Close reference" }).click();
     checks.push(
       "Gallery uses local image blobs; note search + detail + original link",
     );
@@ -233,10 +233,10 @@ try {
     await feed.locator('#primary [data-testid="like"]').click();
     await dialog.waitFor();
     await dialog
-      .getByRole("textbox", { name: /nota|gustó|referencia/i })
+      .getByRole("textbox", { name: /remember/i })
       .first()
       .fill("This second note must never overwrite the original.");
-    await dialog.getByRole("button", { name: /Guardar referencia/i }).click();
+    await dialog.getByRole("button", { name: /Save reference/i }).click();
     await dialog.waitFor({ state: "hidden" });
     const duplicate = await library.evaluate(async () =>
       (await import("./core/db.js")).getEntries(),
@@ -248,7 +248,7 @@ try {
     );
     await feed.locator('#secondary [data-testid="like"]').click();
     await dialog.waitFor();
-    await dialog.getByRole("button", { name: "Omitir", exact: true }).click();
+    await dialog.getByRole("button", { name: "Skip", exact: true }).click();
     await dialog.waitFor({ state: "hidden" });
     assert.equal(
       (
@@ -261,7 +261,7 @@ try {
     await feed.locator('#secondary [data-testid="unlike"]').click();
     await feed.locator('#secondary [data-testid="like"]').waitFor();
     checks.push(
-      "Escape and Omitir preserve likes and create no files/queue entries",
+      "Escape and Skip preserve likes and create no files/queue entries",
     );
     await feed.evaluate(() => {
       const media = document.createElement("div");
@@ -277,18 +277,18 @@ try {
     await feed.locator('#secondary [data-testid="like"]').click();
     await dialog.waitFor();
     assert.equal(await dialog.locator("img").count(), 2);
-    await dialog.getByRole("checkbox", { name: "Guardar imagen 2" }).uncheck();
+    await dialog.getByRole("checkbox", { name: "Save image 2" }).uncheck();
     await dialog
-      .getByRole("textbox", { name: /nota|gustó|referencia/i })
+      .getByRole("textbox", { name: /remember/i })
       .first()
       .fill(
-        "Otra referencia para probar recuperación de una descarga fallida.",
+        "Another reference to test recovery after a failed download.",
       );
-    await dialog.getByRole("button", { name: /Guardar referencia/i }).click();
+    await dialog.getByRole("button", { name: /Save reference/i }).click();
     await dialog.waitFor({ state: "hidden", timeout: 30000 });
-    await library.getByRole("button", { name: "Actualizar" }).click();
+    await library.getByRole("button", { name: "Refresh" }).click();
     await library
-      .getByRole("heading", { name: "Referencias pendientes" })
+      .getByRole("heading", { name: "Pending saves" })
       .waitFor();
     let pending = await library.evaluate(async () =>
       (await import("./core/db.js")).getEntries(),
@@ -302,7 +302,7 @@ try {
     await cdp.send("ServiceWorker.enable");
     await cdp.send("ServiceWorker.stopAllWorkers");
     failingMedia = false;
-    await library.getByRole("button", { name: "Reintentar guardados" }).click();
+    await library.getByRole("button", { name: "Retry saves" }).click();
     await library
       .locator("#pending-panel")
       .waitFor({ state: "hidden", timeout: 30000 });
@@ -327,7 +327,7 @@ try {
           postId: "42345678901",
           url: "https://x.com/multi/status/42345678901",
           author: "@multi",
-          note: "Referencia de dos imágenes para probar cambios rápidos de detalle.",
+          note: "Two images to test quick changes between reference details.",
           category: { id: "cards", label: "Cards" },
           tags: [],
           images: [
@@ -343,7 +343,7 @@ try {
     );
     assert.equal(multi.result.status, "saved");
     await library.getByRole("searchbox").fill("");
-    await library.getByRole("button", { name: "Actualizar" }).click();
+    await library.getByRole("button", { name: "Refresh" }).click();
     await library.waitForFunction(
       () => document.querySelectorAll(".reference-card").length === 3,
     );
@@ -362,7 +362,7 @@ try {
       .locator(".reference-card")
       .filter({ hasText: "@multi" })
       .click();
-    await library.getByRole("button", { name: "Cerrar referencia" }).click();
+    await library.getByRole("button", { name: "Close reference" }).click();
     await library
       .locator(".reference-card")
       .filter({ hasText: "@designer" })
@@ -373,7 +373,7 @@ try {
       1,
       "Previous detail reads cannot append into new reference",
     );
-    await library.getByRole("button", { name: "Cerrar referencia" }).click();
+    await library.getByRole("button", { name: "Close reference" }).click();
     checks.push(
       "Closing a slow multi-image detail and opening another reference does not mix image elements",
     );
@@ -388,7 +388,7 @@ try {
       .evaluate((button) => (button.dataset.fixtureRerender = "true"));
     await feed.locator('#primary [data-testid="like"]').click();
     await dialog.waitFor();
-    await dialog.getByRole("button", { name: "Omitir", exact: true }).click();
+    await dialog.getByRole("button", { name: "Skip", exact: true }).click();
     await dialog.waitFor({ state: "hidden" });
     await feed.locator('#primary [data-testid="unlike"]').click();
     await feed.locator('#primary [data-testid="like"]').waitFor();
@@ -403,10 +403,10 @@ try {
     await dialog.waitFor();
     await dialog.locator(".source").filter({ hasText: "@designer" }).waitFor();
     assert.equal(await dialog.count(), 1, "Only one queued dialog shown");
-    await dialog.getByRole("button", { name: "Omitir", exact: true }).click();
+    await dialog.getByRole("button", { name: "Skip", exact: true }).click();
     await dialog.locator(".source").filter({ hasText: "@second" }).waitFor();
     assert.equal(await dialog.count(), 1);
-    await dialog.getByRole("button", { name: "Omitir", exact: true }).click();
+    await dialog.getByRole("button", { name: "Skip", exact: true }).click();
     await dialog.waitFor({ state: "hidden" });
     checks.push(
       "Tweet DOM replacement is detected; rapid confirmed likes queue sequential dialogs without stacking",
@@ -436,13 +436,13 @@ try {
     // DevTools "allow" replaces the extension's requested filename with the
     // server suggestion. Use the fresh test profile's normal download manager.
     await downloadSession.send("Browser.setDownloadBehavior", { behavior: "default" });
-    await library.getByRole("button", { name: "Usar Descargas" }).click();
-    await library.getByText("Descargas / Design Shelf", { exact: true }).waitFor();
+    await library.getByRole("button", { name: "Use Downloads" }).click();
+    await library.getByText("Downloads / Design Shelf", { exact: true }).waitFor();
     const exported = await library.evaluate(async () => chrome.runtime.sendMessage({
       type: "SAVE_REFERENCE",
       reference: {
         url: "https://x.com/fixture/status/777999",
-        note: "Referencia de prueba para Brave sin selector de carpetas.",
+        note: "Test reference for Brave without a directory picker.",
         category: { id: "cards", label: "Cards" },
         tags: ["brave"],
         images: [{ sourceUrl: "https://pbs.twimg.com/media/DownloadShelf?format=png" }],
@@ -452,12 +452,12 @@ try {
     assert.equal(exported.result.status, "saved", JSON.stringify(exported));
     const savedPath = join(downloadDir, "Design Shelf", exported.result.reference.relativePath);
     assert.deepEqual(await readFile(join(savedPath, "image-01.png")), png);
-    assert.match(await readFile(join(savedPath, "note.md"), "utf8"), /Brave sin selector/);
+    assert.match(await readFile(join(savedPath, "note.md"), "utf8"), /Brave without a directory picker/);
     assert.equal(JSON.parse(await readFile(join(savedPath, "reference.json"), "utf8")).postId, "777999");
-    await library.getByRole("button", { name: "Actualizar" }).click();
-    await library.locator(".reference-card").filter({ hasText: "Brave sin selector" }).waitFor();
+    await library.getByRole("button", { name: "Refresh" }).click();
+    await library.locator(".reference-card").filter({ hasText: "Brave without a directory picker" }).waitFor();
     await library.reload();
-    await library.locator(".reference-card").filter({ hasText: "Brave sin selector" }).waitFor();
+    await library.locator(".reference-card").filter({ hasText: "Brave without a directory picker" }).waitFor();
     checks.push("Without picker, Downloads mode exports real image/note/JSON in category folders and persists gallery across reload");
     const renamedRelative = `cards/${new Date().toISOString().slice(0, 10)}_777998`;
     const renamedPath = join(downloadDir, "Design Shelf", renamedRelative);
@@ -474,7 +474,7 @@ try {
     }, renamedRelative);
     const renamed = await library.evaluate(async () => chrome.runtime.sendMessage({
       type: "SAVE_REFERENCE", reference: {
-        url: "https://x.com/fixture/status/777998", note: "La paleta de colores",
+        url: "https://x.com/fixture/status/777998", note: "The color palette",
         category: { id: "cards", label: "Cards" },
         images: [{ sourceUrl: "https://pbs.twimg.com/media/RenameShelf?format=png" }],
       },

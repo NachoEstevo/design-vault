@@ -31,7 +31,7 @@ test("persist failure, only explicit retry, duplicate identity", async () => {
 test("category collisions and pending destination changes blocked", async () => {
   const store = db();
   const service = createCaptureService({ db: store, fetcher });
-  await assert.rejects(service.addCategory("Cárds"), /existe/);
+  await assert.rejects(service.addCategory("Cárds"), /already exists/);
   await store.setSetting("folder", directory());
   await store.setSetting("folderToken", "one");
   await store.putEntry({
@@ -42,7 +42,7 @@ test("category collisions and pending destination changes blocked", async () => 
   });
   const key = "folderCandidate:12345678-1234-1234-1234-123456789012";
   await store.setSetting(key, directory());
-  await assert.rejects(service.setFolder(key), /pendientes/);
+  await assert.rejects(service.setFolder(key), /pending/);
   assert.equal(await store.getSetting(key), null);
 });
 
@@ -71,7 +71,7 @@ test("concurrent captures serialize and preserve one identity", async () => {
 test("missing destination is rejected without creating stuck pending work", async () => {
   const store = db();
   const service = createCaptureService({ db: store });
-  await assert.rejects(service.saveReference(input), /carpeta/);
+  await assert.rejects(service.saveReference(input), /folder/i);
   assert.equal((await store.getEntries()).length, 0);
 });
 test("destination switch persists handle and token, repeat pick preserves token", async () => {
@@ -151,6 +151,6 @@ test("downloads setup cannot move pending work from an external folder", async (
   await store.setSetting("folderToken", "one");
   await store.putEntry({ postId: "123", status: "pending", folderToken: "one", reference: input });
   const service = createCaptureService({ db: store, privateDirectory: async () => directory() });
-  await assert.rejects(service.useDownloads(), /pendientes/);
+  await assert.rejects(service.useDownloads(), /pending/);
   assert.equal(await store.getSetting("folderToken"), "one");
 });

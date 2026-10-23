@@ -30,7 +30,7 @@ export function createCaptureService({
       categories: categories || DEFAULT_CATEGORIES,
       folder: folder
         ? {
-            name: mode === "downloads" ? "Descargas / Design Shelf" : folder.name,
+            name: mode === "downloads" ? "Downloads / Design Shelf" : folder.name,
             mode: mode || "directory",
             permission: await folder.queryPermission({ mode: "readwrite" }),
           }
@@ -42,9 +42,9 @@ export function createCaptureService({
     try {
       const token = await db.getSetting("folderToken");
       if (entry.folderToken !== token)
-        throw new Error("La carpeta de destino cambió");
+        throw new Error("The destination folder changed");
       const folder = await db.getSetting("folder");
-      if (!folder) throw new Error("Elegí una carpeta en la biblioteca");
+      if (!folder) throw new Error("Choose a folder in the library");
       const mode = await db.getSetting("storageMode");
       let reference = entry.localReference;
       if (!reference) {
@@ -98,7 +98,7 @@ export function createCaptureService({
     useDownloads: () => serial(async () => {
       const settings = await getSettings();
       if (settings.folder?.mode === "downloads") return settings;
-      if (settings.pendingCount) throw new Error("Resolvé los guardados pendientes antes de cambiar de destino");
+      if (settings.pendingCount) throw new Error("Resolve pending saves before changing the destination");
       const root = await (await privateDirectory()).getDirectoryHandle("downloads-library", { create: true });
       await db.setFolderSettings(root, crypto.randomUUID(), "downloads");
       return getSettings();
@@ -108,7 +108,7 @@ export function createCaptureService({
         const reference = normalizeReference(input);
         const settings = await getSettings();
         if (!settings.folder)
-          throw new Error("Elegí una carpeta en la biblioteca");
+          throw new Error("Choose a folder in the library");
         if (
           !settings.categories.some(
             (c) =>
@@ -116,7 +116,7 @@ export function createCaptureService({
               c.label === reference.category.label,
           )
         )
-          throw new Error("Categoría desconocida");
+          throw new Error("Unknown category");
         const token = await db.getSetting("folderToken");
         const existing = await db.getEntry(reference.postId);
         if (
@@ -129,7 +129,7 @@ export function createCaptureService({
             error: existing.error,
           };
         if (settings.pendingCount >= 20)
-          throw new Error("La cola pendiente está llena");
+          throw new Error("The pending queue is full");
         const entry = {
           captureId: crypto.randomUUID(),
           postId: reference.postId,
@@ -152,7 +152,7 @@ export function createCaptureService({
         const category = normalizeCategory(label);
         const { categories } = await getSettings();
         if (categories.some((c) => c.id === category.id))
-          throw new Error("Ya existe una categoría con ese nombre");
+          throw new Error("A category with this name already exists");
         const next = [...categories, category];
         await db.setSetting("categories", next);
         return { category, categories: next };
@@ -160,20 +160,20 @@ export function createCaptureService({
     setFolder: (candidateKey) =>
       serial(async () => {
         if (!/^folderCandidate:[0-9a-f-]{36}$/.test(candidateKey))
-          throw new Error("Carpeta candidata inválida");
+          throw new Error("Invalid candidate folder");
         const root = await db.getSetting(candidateKey);
         try {
           if (!root || root.kind !== "directory")
-            throw new Error("Carpeta inválida");
+            throw new Error("Invalid folder");
           const settings = await getSettings();
           const current = await db.getSetting("folder");
           if (settings.folder?.mode !== "downloads" && current && (await root.isSameEntry(current))) return settings;
           if (settings.pendingCount)
             throw new Error(
-              "Resolvé los guardados pendientes antes de cambiar la carpeta",
+              "Resolve pending saves before switching folders",
             );
           if ((await root.queryPermission({ mode: "readwrite" })) !== "granted")
-            throw new Error("Permiso de carpeta requerido");
+            throw new Error("Folder access is required");
           await db.setFolderSettings(root, crypto.randomUUID());
           return getSettings();
         } finally {

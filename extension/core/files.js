@@ -30,12 +30,12 @@ async function writeOwned(dir, name, data, entry, checkpoint) {
   }
   if (file) {
     const current = await file.getFile();
-    if (!previous) throw new Error(`Archivo existente ajeno: ${name}`);
+    if (!previous) throw new Error(`Unowned existing file: ${name}`);
     if (previous.hash !== hash)
-      throw new Error(`Contenido previsto cambio: ${name}`);
+      throw new Error(`Expected content changed: ${name}`);
     if ((await digest(current)) === hash) return;
     if (previous.state === "closed" || current.size !== 0)
-      throw new Error(`Archivo modificado: ${name}`);
+      throw new Error(`File changed: ${name}`);
   }
   // Persist intent before creating an empty handle, so failed writes remain recoverable.
   entry.journal.files[name] = { hash, state: "writing" };
@@ -66,7 +66,7 @@ export async function readLibrary(root) {
           hasMetadata = true;
           const metadata = await file.getFile();
           if (metadata.size > 256 * 1024)
-            throw new Error("Metadatos demasiado grandes");
+            throw new Error("Metadata is too large");
           const reference = JSON.parse(await metadata.text());
           const clean = normalizeReference(
             reference,
@@ -77,7 +77,7 @@ export async function readLibrary(root) {
             reference.relativePath !== `${category}/${name}` ||
             clean.relativePath !== reference.relativePath
           )
-            throw new Error("Ruta inválida");
+            throw new Error("Invalid path");
           for (const img of reference.images) {
             if (
               !TYPES[img.mimeType] ||
@@ -86,7 +86,7 @@ export async function readLibrary(root) {
               img.size < 1 ||
               img.size > LIMIT
             )
-              throw new Error("Archivo de imagen inválido");
+              throw new Error("Invalid image file");
             await handle.getFileHandle(img.fileName);
           }
           items.push({
@@ -119,14 +119,14 @@ export async function writeReference(
   checkpoint = async () => {},
 ) {
   if ((await root.queryPermission({ mode: "readwrite" })) !== "granted")
-    throw new Error("Renová el permiso de la carpeta");
+    throw new Error("Renew folder access");
   const reference = normalizeReference(
     entry.reference,
     new Date(entry.reference.capturedAt),
   );
   const library = await readLibrary(root);
   if (library.items.some((item) => item.reference.postId === reference.postId))
-    throw Object.assign(new Error("La referencia ya existe en la carpeta"), {
+    throw Object.assign(new Error("The reference already exists in this folder"), {
       code: "DUPLICATE",
     });
   const category = await root.getDirectoryHandle(reference.category.id, {
@@ -139,7 +139,7 @@ export async function writeReference(
     relativePath: reference.relativePath,
     sources: reference.images.map((image) => image.sourceUrl),
   };
-  if (!marker.captureId) throw new Error("Identidad de guardado ausente");
+  if (!marker.captureId) throw new Error("Missing capture identity");
   let dir;
   try {
     dir = await category.getDirectoryHandle(name);
@@ -147,7 +147,7 @@ export async function writeReference(
     if (error.name !== "NotFoundError") throw error;
   }
   if (dir && !entry.journal?.directory) {
-    throw new Error("La carpeta ya existe y no pertenece a este guardado");
+    throw new Error("This folder exists and does not belong to this save");
   }
   if (!entry.journal) entry.journal = { directory: true, files: {} };
   await checkpoint(entry);
@@ -170,19 +170,19 @@ export async function writeReference(
         credentials: "omit",
       });
       if (!response.ok)
-        throw new Error(`Descarga fallida (${response.status})`);
+        throw new Error(`Download failed (${response.status})`);
       if (
         response.url &&
         new URL(response.url).origin !== "https://pbs.twimg.com"
       )
-        throw new Error("Destino de imagen inválido");
+        throw new Error("Invalid image destination");
       const mimeType = (response.headers.get("content-type") || "")
         .split(";")[0]
         .trim()
         .toLowerCase();
-      if (!TYPES[mimeType]) throw new Error("Tipo de imagen no permitido");
+      if (!TYPES[mimeType]) throw new Error("Unsupported image type");
       if (Number(response.headers.get("content-length")) > LIMIT)
-        throw new Error("Imagen demasiado grande");
+        throw new Error("Image is too large");
       const reader = response.body.getReader();
       const chunks = [];
       let size = 0;
@@ -192,11 +192,11 @@ export async function writeReference(
         size += value.byteLength;
         if (size > LIMIT) {
           await reader.cancel();
-          throw new Error("Imagen demasiado grande");
+          throw new Error("Image is too large");
         }
         chunks.push(value);
       }
-      if (!size) throw new Error("Imagen vacía");
+      if (!size) throw new Error("Empty image");
       const fileName = `image-${String(i + 1).padStart(2, "0")}.${TYPES[mimeType]}`;
       await writeOwned(
         dir,
@@ -214,7 +214,7 @@ export async function writeReference(
   await writeOwned(
     dir,
     "note.md",
-    `${reference.note}\n\n${reference.url}\n\nEtiquetas: ${reference.tags.join(", ")}\n`,
+    `${reference.note}\n\n${reference.url}\n\nTags: ${reference.tags.join(", ")}\n`,
     entry,
     checkpoint,
   );

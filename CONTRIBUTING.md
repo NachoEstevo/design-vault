@@ -1,6 +1,6 @@
-# Agregar o mejorar skills
+# Contributing
 
-Cada skill instalable vive en `skills/<nombre>/` y tiene un único `SKILL.md` como entrada. Mantené las instrucciones centrales cortas; separá operaciones, criterios o ejemplos cuando solo se necesiten en ciertos pedidos.
+Each installable skill lives in `skills/<name>/` with one `SKILL.md` entry point. Keep core instructions concise; move conditional operations, criteria, and examples into references that are loaded only when relevant.
 
 ```text
 skills/
@@ -12,24 +12,25 @@ skills/
     scripts/
 ```
 
-Para una skill nueva, partí de [la plantilla](templates/SKILL.template.md). No agregues carpetas de skills vacías ni habilidades que solo prometan algo futuro. Elegí un alcance que tenga usos reales y comprobá su descubrimiento e invocación.
+Start from [the template](templates/SKILL.template.md) for a new skill. Do not add empty skill directories or installable stubs for future features. Choose a real scope and verify discovery and invocation.
 
-Posibles extensiones, todavía **no implementadas**:
+Possible additions, **not implemented today**:
 
-| Nombre posible | Alcance que justificaría separarla |
+| Possible name | Scope that could justify a separate skill |
 | --- | --- |
-| `component-vault` | Recuperar y adaptar patrones de componentes con sus estados. |
-| `motion-vault` | Diseñar y verificar coreografías desde referencias de movimiento reales. |
-| `brand-vault` | Trabajar con identidad, tipografía y material propio de una marca. |
+| `component-vault` | Retrieve and adapt component patterns with their states. |
+| `motion-vault` | Design and verify choreography from actual motion references. |
+| `brand-vault` | Work with identity, typography, and a brand's own material. |
 
-Hoy Design Vault ya cubre decisiones de componentes y movimiento estático observado dentro de su flujo. Separarlas tendría sentido con recursos o procedimientos propios; no dupliques las mismas reglas en varias skills. Una captura estática no sirve como prueba de una animación.
+Design Vault already handles component decisions and motion guidance within its flow. Separate skills make sense when they have their own resources or procedures. Avoid duplicating the same rules; a static screenshot cannot prove an animation.
 
-## Antes de abrir un cambio
+## Before submitting a change
 
-- Usá datos sintéticos en las pruebas. No publiques referencias, notas, credenciales, sesiones ni rutas personales.
-- Guardá configuración de ejemplo; `vault.json` real queda ignorado.
-- Ejecutá los comandos de desarrollo del README y revisá el diff completo.
-- Documentá comportamiento y límites observables, sin claims de compatibilidad sin probar.
-- Si una dependencia nueva es necesaria, explicá qué aporta y en qué entorno se instala.
+- Use synthetic test data. Never publish references, notes, credentials, sessions, or personal paths.
+- Keep example configuration in Git; real `vault.json` files stay ignored.
+- Run the development checks in the README and inspect the complete diff.
+- Document observable behavior and limitations without untested compatibility claims.
+- Explain the concrete benefit and installation impact of any new dependency.
+- Keep public documentation, skill instructions, CLI output, and extension UI in English. Multilingual search vocabulary and explicit language-coverage fixtures are intentional.
 
-El CI comprueba los archivos versionados con `scripts/check-public.py`. No reemplaza revisar qué se está publicando, especialmente al incorporar binarios o material de terceros.
+CI runs `scripts/check-public.py` against tracked files. This does not replace reviewing what is being published, especially when adding binaries or third-party material.

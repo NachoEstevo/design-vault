@@ -1,24 +1,24 @@
-# Catálogo tipográfico preferido
+# Preferred typography catalog
 
-Prioridad: fuente explícitamente pedida → fuente definida por marca/proyecto → opciones preferidas del vault. Si una fuente solicitada no está disponible, explicar la limitación y proponer una alternativa; no sustituirla silenciosamente.
+Priority: explicitly requested font → project/brand font → vault defaults. If a requested font is unavailable, explain and suggest an alternative instead of silently substituting it.
 
-Proponer habitualmente una o dos opciones justificadas. Una familia para interfaz y otra para titulares solo cuando aporte carácter. No usar Inter como respuesta automática ni rotar fuentes durante ajustes del mismo diseño.
+Normally propose one or two justified options. Add display type only when it contributes character. Do not choose Inter automatically or rotate fonts during iterations of one design.
 
-| Uso propuesto | Opciones |
+| Intended role | Options |
 | --- | --- |
-| Interfaz y lectura | Inter, Geist, TikTok Sans, Liberation Sans |
-| Dirección sobria | Arial, Helvetica Neue |
-| Titulares o dirección editorial | Faculty Glyphic, DejaVu Serif |
-| Dirección geométrica | Euclid Circular B |
-| Contexto de escritura japonesa | Yu Gothic |
-| Pendientes de identificar por archivo/fundición | Connections, Practa, Youth Touch DEMO |
-| Símbolos, sin usarse para párrafos o titulares de texto | Webdings |
+| Interface and reading | Inter, Geist, TikTok Sans, Liberation Sans |
+| Restrained direction | Arial, Helvetica Neue |
+| Display or editorial | Faculty Glyphic, DejaVu Serif |
+| Geometric direction | Euclid Circular B |
+| Japanese writing | Yu Gothic |
+| Requires file/foundry identification | Connections, Practa, Youth Touch DEMO |
+| Symbols only, never body copy or text headings | Webdings |
 
-Son criterios de selección, no prueba de disponibilidad o permiso de distribución. Validar el archivo, variantes, idioma, acentos/ñ, números y pesos reales. Una fuente instalada en escritorio no demuestra que se pueda redistribuir como webfont. Mantener fuentes y condiciones de uso junto a assets cuando corresponda. No descargar versiones DEMO no verificadas ni simular pesos inexistentes.
+These are suggestions, not proof of availability or distribution rights. Verify files, variants, languages, accents, numbers, and weights. Desktop installation does not establish permission to redistribute a webfont. Keep relevant licenses with project assets. Avoid unverified demo versions and simulated weights.
 
-En una implementación comprobar la carga real, los fallbacks, saltos de línea y densidad en los tamaños usados. Declarar font-family no demuestra que la fuente renderizada sea esa. Para dashboards comprobar cifras, tabulares si disponibles y distinción entre caracteres ambiguos.
+Check actual font loading, fallbacks, wrapping, and density at the sizes used. A font-family declaration does not prove which font rendered. Check numerical readability, tabular figures where available, and ambiguous characters for dashboards.
 
-Fuentes primarias para verificar archivos y condiciones concretas:
+Primary sources:
 
 - [Inter](https://rsms.me/inter/)
 - [Geist](https://github.com/vercel/geist-font)
@@ -27,4 +27,4 @@ Fuentes primarias para verificar archivos y condiciones concretas:
 - [Yu Gothic](https://learn.microsoft.com/en-us/typography/font-list/yu-gothic)
 - [Webdings](https://learn.microsoft.com/en-us/typography/font-list/webdings)
 
-No asumir la identidad de Connections, Practa o Youth Touch DEMO solo por esos nombres: solicitar el archivo o identificar su origen cuando sea necesario para usarlas.
+Do not identify Connections, Practa, or Youth Touch DEMO by name alone. Ask for the file or verify its origin when needed.

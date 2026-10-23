@@ -22,7 +22,7 @@ test("normalizes identity, tags and CDN original size", () => {
   assert.match(r.images[0].sourceUrl, /name=orig/);
 });
 test("rejects unsafe input and empty notes", () => {
-  assert.throws(() => normalizeReference({ ...valid, note: " " }), /nota/i);
+  assert.throws(() => normalizeReference({ ...valid, note: " " }), /note/i);
   assert.throws(() => normalizeCategory("../bad"));
   assert.throws(() => normalizeImageUrl("https://example.com/a.png"));
   assert.throws(() => normalizeReference({ ...valid, postId: "999" }));

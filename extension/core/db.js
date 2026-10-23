@@ -21,7 +21,7 @@ async function operation(store, mode, action) {
     };
     tx.oncomplete = () => resolve(result);
     tx.onerror = () => reject(tx.error);
-    tx.onabort = () => reject(tx.error || new Error("Transacción cancelada"));
+    tx.onabort = () => reject(tx.error || new Error("Transaction cancelled"));
   });
 }
 export const getSetting = (key) =>
@@ -45,6 +45,6 @@ export async function setFolderSettings(folder, folderToken, mode = "directory")
     settings.put(mode, "storageMode");
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
-    tx.onabort = () => reject(tx.error || new Error("Transacción cancelada"));
+    tx.onabort = () => reject(tx.error || new Error("Transaction cancelled"));
   });
 }

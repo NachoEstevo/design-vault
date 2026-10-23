@@ -1,12 +1,12 @@
-# Arquitectura
+# Architecture
 
-## Tres responsabilidades
+## Three responsibilities
 
-- **Design Shelf:** detecta el like, muestra el modal y guarda archivos locales. El modo Descargas usa `chrome.downloads`; el modo carpeta usa handles del navegador. Su almacenamiento privado conserva la cola de recuperación.
-- **Design Vault:** lee `reference.json`, construye un índice SQLite local y selecciona referencias. La búsqueda no modifica los originales. `describe` escribe análisis separados en `_design-vault/descriptions`.
-- **El agente:** interpreta el pedido, abre unas pocas imágenes, decide qué aplicar, implementa el diseño y revisa el resultado. El script no ejecuta visión ni genera una página por sí mismo.
+- **Design Shelf:** detects likes, presents the capture modal, and writes local files. Downloads mode uses `chrome.downloads`; folder mode uses browser directory handles. Browser-private storage also preserves the recovery queue.
+- **Design Vault:** reads `reference.json`, builds a local SQLite index, and retrieves references. Search does not modify originals. `describe` writes separate observations into `_design-vault/descriptions`.
+- **The agent:** interprets the brief, views a few images, chooses what to apply, builds the design, and reviews the result. The script does not perform vision or generate a website by itself.
 
-## Contrato de la biblioteca
+## Library contract
 
 ```text
 Design Shelf/
@@ -19,22 +19,24 @@ Design Shelf/
     descriptions/
 ```
 
-`reference.json` guarda identidad del post, fuente, fecha, categoría, etiquetas, nota y nombres reales de las imágenes. La categoría organiza la carpeta; las etiquetas aportan búsqueda sin duplicar archivos. Los fixtures de `tests/` muestran el formato con contenido sintético.
+`reference.json` preserves post identity, source, capture time, category, tags, note, and actual image filenames. The category determines the directory; tags support retrieval without duplicating files. Test fixtures demonstrate the format with synthetic content.
 
-Cada imagen tiene un ID `<postId>:<índice>`. Dos imágenes del mismo post pueden tener estilos diferentes. El buscador limita el aporte de un mismo post y usa hashes conocidos para evitar repeticiones.
+Each image has an ID `<postId>:<index>`. Images from the same post can have different styles. Selection limits contributions from a single post and uses known hashes to avoid repetitions.
 
-## Escala y continuidad
+## Scale and continuity
 
-La actualización revisa firmas y relee metadatos modificados, sin abrir los píxeles originales. La búsqueda usa FTS5, pondera señales textuales y selecciona desde un conjunto acotado. Crear una lámina sí abre las candidatas; los análisis visuales se hacen solo después de inspeccionar originales.
+Refresh checks file signatures and rereads changed metadata without opening original pixels. Retrieval uses FTS5, weights textual signals, and samples from a bounded candidate pool. Contact sheets open only session candidates. Visual descriptions are recorded only after inspecting originals.
 
-Las sesiones conservan firma de búsqueda, candidatos, semilla y selección. Si cambia la búsqueda se usa otra sesión. El agente coordina las sub-sesiones por componentes; no existe agregación automática ni garantía de cobertura semántica de toda la biblioteca.
+Sessions preserve the search signature, candidates, seed, and selection. A changed search needs another session. The agent coordinates component sub-sessions; there is no automatic session aggregation or guarantee of semantic coverage across the library.
 
-El índice, las miniaturas y el historial viven fuera del vault, en la caché local del equipo. No sincronizar una base abierta. Las descripciones verifican vigencia frente al archivo observado. Notas y metadatos se tratan como datos, no como instrucciones ejecutables.
+The index, thumbnails, and session history live in a per-library local cache outside the vault. Do not synchronize an open database. Descriptions track file freshness. Notes and metadata are reference data, never executable instructions.
 
-## Configuración
+## Configuration
 
-Prioridad de raíz: argumento `--root` → variable `DESIGN_VAULT_ROOT` → `vault.json` en la skill → `vault.example.json`. Los argumentos globales `--root` y `--cache` van antes del subcomando. La caché no puede estar dentro del vault.
+Root precedence: `--root` argument → `DESIGN_VAULT_ROOT` environment variable → local `vault.json` → `vault.example.json`. Global `--root` and `--cache` arguments precede the subcommand. The cache must be outside the vault.
 
-El instalador genera configuración en la skill instalada, no dentro del checkout público. No actualiza ni reemplaza instalaciones existentes. Para actualizar, revisá cambios y preservá tu `vault.json` y preferencias antes de copiar una versión nueva.
+The installer writes configuration to the installed skill, outside the public checkout. Existing installations are never replaced. To update, review changes and preserve your configuration and preferences before copying the new version.
 
-No hay backend, base remota, autenticación de Google, sincronización R2 automática ni colección pública incluida.
+There is no backend, remote database, Google authentication, automatic R2 sync, or bundled public library.
+
+The next cloud architecture is defined separately in [private-cloud.md](private-cloud.md). It supports a hosted inspiration service and bring-your-own private deployments, while distinguishing actual original-image privacy from simply hiding previews in a UI.

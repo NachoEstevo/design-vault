@@ -19,7 +19,7 @@ class InstallationTests(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory()
         self.base = Path(self.temporary.name)
-        self.vault = self.base / "biblioteca de prueba"
+        self.vault = self.base / "test library"
         self.vault.mkdir()
         self.skills = self.base / "skills"
 

@@ -220,7 +220,7 @@ class VaultTests(unittest.TestCase):
         output = self.base / "contact.png"
         with patch.object(Image, "open", wraps=Image.open) as opened:
             contact_sheet(self.catalog, "sheet", output)
-        original_calls = [call for call in opened.call_args_list if Path(call.args[0]).is_relative_to(self.root)]
+        original_calls = [call for call in opened.call_args_list if Path(call.args[0]).resolve().is_relative_to(self.root.resolve())]
         self.assertEqual(len(original_calls), 3)
         before = output.read_bytes()
         with self.assertRaises(ValueError):

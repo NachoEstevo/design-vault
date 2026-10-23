@@ -1,19 +1,19 @@
-# Fondos y assets con ImageGen
+# Backgrounds and assets with ImageGen
 
-Usar la herramienta de generación de imágenes que esté realmente disponible en la sesión, con su esquema documentado. La skill no requiere una API key para una herramienta integrada. No instalar un SDK ni pasar a una API/CLI de pago automáticamente si falta la herramienta. Si existe una skill ImageGen en ese entorno, aplicar su guía relevante.
+Use the image-generation tool actually available in the session and its documented schema. Integrated tools do not require this skill to supply an API key. Do not automatically install an SDK or switch to a paid API/CLI if the tool is missing. Follow relevant guidance from an available ImageGen skill.
 
-Elegir e inspeccionar primero las referencias. Para imágenes locales, abrir cada referencia elegida con la herramienta de imagen antes de enviarla como contexto. En entornos con el esquema `image_gen.imagegen`, usar `referenced_image_paths` si todos los inputs tienen rutas locales, o `num_last_images_to_include` mínimo suficiente si algún input no tiene ruta; nunca ambos. Para una creación sin referencias visuales de entrada, omitir ambos. En otro entorno, seguir el mecanismo documentado allí.
+Select and inspect references first. View each chosen local image before supplying it as context. With `image_gen.imagegen`, use `referenced_image_paths` when every input has a local path, or the smallest sufficient `num_last_images_to_include` when an input lacks one; never both. Omit both for a new image without visual inputs. Follow other environments' documented mechanisms when different.
 
-Definir un encargo breve:
+Define a concise brief:
 
-- Función: fondo de hero, textura de card, ilustración, objeto o asset transparente.
-- Referencias: qué aporta cada imagen y qué debe conservarse del diseño propio.
-- Dirección: composición, paleta, materiales y grado de detalle.
-- Integración: proporción, áreas libres para texto, contraste y transparencia real cuando haga falta.
-- Restricciones: evitar texto accidental, logos ajenos, contenido innecesario y una copia literal de la referencia.
+- Role: hero background, card texture, illustration, object, or transparent asset.
+- References: each input's contribution and what the project's direction preserves.
+- Direction: composition, palette, materials, and detail.
+- Integration: aspect ratio, clear text areas, contrast, and real transparency where needed.
+- Constraints: avoid accidental text, unrelated logos, unnecessary content, and literal copying.
 
-Generar una propuesta inicial, inspeccionarla y ajustar con un cambio concreto si hace falta. Para un asset raster pedido usar ImageGen; para formas simples o un sistema SVG existente usar sus recursos nativos cuando corresponda. Una imagen del hero no debe contener el texto o botones funcionales de la interfaz salvo que el pedido sea una maqueta raster.
+Generate an initial proposal, inspect it, and adjust with a focused change if needed. Use ImageGen for requested raster assets; use native resources for simple shapes or an existing SVG system where appropriate. Hero imagery must not contain functional interface text or buttons unless the request is a raster mockup.
 
-Mostrar la imagen generada con el mecanismo nativo. En Codex la herramienta puede guardar bajo su directorio de imágenes generadas; copiar el output elegido al proyecto si se va a consumir allí, verificando la ruta real devuelta por la herramienta. No inventar parámetros de destino ni dejar un asset de proyecto solo en caché. Conservar la transparencia y evitar sobreescribir assets existentes sin un pedido de reemplazo.
+Show actual generated output through the native result mechanism. Codex may save it under its generated-image directory; copy selected outputs into the project when needed using the real returned path. Do not invent destination parameters or leave project assets only in cache. Preserve transparency and do not overwrite existing assets without a replacement request.
 
-Guardar el prompt final y las rutas del output en los entregables del proyecto. No agregar generaciones al vault automáticamente: esa colección refleja referencias elegidas por el usuario. Si falta ImageGen, una especificación de generación se identifica como pendiente, nunca como imagen ya creada.
+Save final prompts and output paths with project deliverables. Never add generations to the vault automatically: it reflects user-selected references. When generation is unavailable, label a prepared specification as pending rather than a generated image.

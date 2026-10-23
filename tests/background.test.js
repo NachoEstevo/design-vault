@@ -24,7 +24,7 @@ test("authenticated X can add categories, untrusted senders cannot", async () =>
     { id: "test-extension", url: "https://x.com/home" },
   );
   assert.equal(trusted.error.code, "CAPTURE_ERROR");
-  assert.match(trusted.error.message, /Categoría/);
+  assert.match(trusted.error.message, /category/i);
   const foreign = await dispatch(
     { type: "ADD_CATEGORY", label: "Cards" },
     { id: "other", url: "https://x.com/home" },

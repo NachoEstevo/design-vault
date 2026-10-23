@@ -30,12 +30,12 @@ test("commits complete metadata last and prevents duplicate across category", as
       {
         reference: normalizeReference({
           ...input,
-          category: { id: "otros", label: "Otros" },
+          category: { id: "other", label: "Other" },
         }),
       },
       fetcher,
     ),
-    /existe/,
+    /already exists/,
   );
 });
 test("partial failure has no final metadata and retry recovers", async () => {
@@ -51,12 +51,12 @@ test("partial failure has no final metadata and retry recovers", async () => {
       async () =>
         new Response("bad", { headers: { "content-type": "text/html" } }),
     ),
-    /Tipo/,
+    /type/,
   );
   assert.equal((await readLibrary(root)).items.length, 0);
   await writeReference(root, entry, fetcher);
   root.permission = "prompt";
-  await assert.rejects(writeReference(root, entry, fetcher), /permiso/);
+  await assert.rejects(writeReference(root, entry, fetcher), /access/);
 });
 test("rejects redirected hosts and oversized headers", async () => {
   const root = directory(),
@@ -67,7 +67,7 @@ test("rejects redirected hosts and oversized headers", async () => {
       url: "https://evil.test/a",
       headers: new Headers({ "content-type": "image/jpeg" }),
     })),
-    /Destino/,
+    /destination/,
   );
   await assert.rejects(
     writeReference(
@@ -81,7 +81,7 @@ test("rejects redirected hosts and oversized headers", async () => {
           },
         }),
     ),
-    /grande/,
+    /large/,
   );
 });
 test("reader skips metadata with traversal filenames", async () => {
@@ -118,13 +118,13 @@ test("foreign existing folders and malformed completed metadata never overwrite"
     reference.relativePath.split("/")[1],
     { create: true },
   );
-  await assert.rejects(writeReference(root, entry, fetcher), /no pertenece/);
+  await assert.rejects(writeReference(root, entry, fetcher), /does not belong/);
   const writer = await (
     await dir.getFileHandle("reference.json", { create: true })
   ).createWritable();
   await writer.write("{broken");
   await writer.close();
-  await assert.rejects(writeReference(root, entry, fetcher), /no pertenece/);
+  await assert.rejects(writeReference(root, entry, fetcher), /does not belong/);
   assert.equal(
     await (await (await dir.getFileHandle("reference.json")).getFile()).text(),
     "{broken",
@@ -140,7 +140,7 @@ test("retry ownership survives service restart and rejects another owner", async
   );
   await assert.rejects(
     writeReference(root, { ...entry, captureId: "foreign" }, fetcher),
-    /previsto/,
+    /Expected content/,
   );
   await writeReference(root, JSON.parse(JSON.stringify(entry)), fetcher);
   assert.equal((await readLibrary(root)).items.length, 1);
@@ -230,7 +230,7 @@ test("partial retry preserves inserted note and modified owned image", async () 
     await writer.close();
     await assert.rejects(
       writeReference(root, structuredClone(entry), fetcher),
-      /Archivo/,
+      /file/i,
     );
     assert.equal(await (await file.getFile()).text(), "my user work");
   }

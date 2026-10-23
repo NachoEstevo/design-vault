@@ -1,10 +1,10 @@
-# Publicar el paquete npm
+# Publishing to npm
 
-El repo público y el registro npm son publicaciones separadas. El paquete está preparado como `@nachoestevo/design-vault`, versión `0.1.0`, pero no se publica automáticamente al pushear. No hay tokens npm en el repo ni un workflow de publicación habilitado.
+The public repository and npm registry are separate publications. The package is prepared as `@nachoestevo/design-vault`, version `0.1.0`, but pushing does not publish it. There are no npm tokens or automatic publishing workflows in this repo.
 
-Antes de publicar, comprobar que la cuenta npm controla ese scope, que el nombre está disponible y que la versión es la que se quiere distribuir. La configuración `publishConfig.access=public` define acceso público para el paquete con scope. Si el nombre cambia, actualizar README, `package.json` y lockfile juntos.
+Before release, verify scope ownership, name availability, and the intended version. `publishConfig.access=public` makes the scoped package public. Update README, `package.json`, and lockfile together if the name changes.
 
-## Revisar y probar sin publicar
+## Review and test without publishing
 
 ```sh
 npm ci
@@ -15,25 +15,25 @@ python scripts/check-public.py
 npm pack --dry-run
 ```
 
-`files` en `package.json` es una lista explícita: instalador, comando, instrucciones, configuración de ejemplo, referencias y scripts de la skill. npm agrega README, licencia y metadatos. No deben aparecer `vault.json`, imágenes, notas, bases, credenciales, extensión, pruebas ni archivos de proyectos personales.
+The `files` allowlist includes only the installer, command, skill instructions, example configuration, references, and scripts. npm adds README, license, and package metadata. The tarball must not contain real configuration, images, notes, databases, credentials, extension code, tests, or private projects.
 
-Generar un paquete local y ejecutar su comando:
+Create `output` if needed, then build and test a local package:
 
 ```sh
 npm pack --pack-destination output
 npm exec --yes --package=./output/nachoestevo-design-vault-0.1.0.tgz -- design-vault --help
 ```
 
-Creá `output` si no existe. Para probar una instalación real, usá una biblioteca sintética y un directorio de skills temporal, distintos de tu instalación habitual:
+Test an actual installation using an existing synthetic library and a temporary skills directory, separate from your regular installation:
 
 ```sh
-npm exec --yes --package=./output/nachoestevo-design-vault-0.1.0.tgz -- design-vault --vault-root "/ruta/a/vault-de-prueba" --skills-root "/ruta/a/skills-de-prueba"
+npm exec --yes --package=./output/nachoestevo-design-vault-0.1.0.tgz -- design-vault --vault-root "/path/to/test-vault" --skills-root "/path/to/test-skills"
 ```
 
-La carpeta del vault debe existir. Repetir la instalación debe fallar conservando la configuración previa. `DESIGN_VAULT_PYTHON` permite indicar un ejecutable Python concreto si no está en PATH.
+A repeat installation must fail while preserving configuration. `DESIGN_VAULT_PYTHON` can point to a specific Python executable when PATH discovery is insufficient.
 
-## Publicación futura
+## Future release
 
-Cuando el nombre, versión y archivos estén revisados, autenticar npm con el flujo del proveedor y ejecutar `npm publish --access public`. No compartir tokens por el chat ni commitear `.npmrc` con credenciales. La publicación no se ejecutó como parte del preparado del repo.
+Once the name, version, and package files have been reviewed, authenticate through npm's own flow and run `npm publish --access public`. Never share tokens in chat or commit an `.npmrc` containing credentials. Preparing this repository did not publish the package.
 
-Después, probar `npx @nachoestevo/design-vault --help` desde otra carpeta, instalar en un destino temporal y revisar el contenido del tarball remoto. Recién entonces actualizar el README para quitar el estado de pendiente.
+After publication, test `npx @nachoestevo/design-vault --help` from a separate directory, install into a temporary destination, and inspect the remote tarball. Then remove the pending-publication notice from the README.

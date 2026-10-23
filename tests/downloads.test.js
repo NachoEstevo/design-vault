@@ -84,6 +84,6 @@ test("files redirected to a different folder do not commit metadata", async () =
   const { root, entry } = await fixture();
   const api = downloads(), search = api.search;
   api.search = async query => (await search(query)).map(item => ({ ...item, filename: item.filename.replace("/cards/", "/other/") }));
-  await assert.rejects(exportReferenceDownloads(root, entry, async () => {}, api), /carpeta/);
+  await assert.rejects(exportReferenceDownloads(root, entry, async () => {}, api), /folder/i);
   assert.equal(api.items.size, 1);
 });

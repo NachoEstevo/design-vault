@@ -1,29 +1,29 @@
-# Capturar referencias con Design Shelf
+# Capture references with Design Shelf
 
-Extensión local de Chrome y Brave: like en un post con imágenes de X → modal con nota, categoría y etiquetas → imágenes y contexto en tu biblioteca.
+A local Chrome/Brave extension: like an X post with images → add a note, category, and tags → save images and context into your library.
 
 ## Brave
 
-1. Abrí `brave://extensions`, activá modo de desarrollador y cargá la carpeta `extension` del repo como extensión descomprimida.
-2. Abrí Design Shelf y elegí **Usar Descargas**. No requiere `showDirectoryPicker` ni flags de Brave.
-3. Recargá las pestañas de X y guardá una referencia. Se descargan imágenes, `note.md` y `reference.json` en `<Descargas>/Design Shelf/<categoría>/<fecha>_<post>/`.
-4. Si querés sincronizar con Drive para escritorio, conectá únicamente esa carpeta dedicada.
+1. Open `brave://extensions`, enable Developer mode, and load this repository's `extension` directory unpacked.
+2. Open Design Shelf and choose **Use Downloads**. No directory picker or Brave flags are required.
+3. Reload X and capture a reference. Images, `note.md`, and `reference.json` are downloaded to `<Downloads>/Design Shelf/<category>/<date>_<post>/`.
+4. To use Drive for desktop, synchronize only that dedicated directory.
 
-La galería del modo Descargas lee una copia privada en el navegador; los archivos exportados son los que puede leer la skill. Borrar datos de la extensión o desinstalarla borra esa copia, pero no los archivos descargados. Los cambios externos no se reflejan en esta galería. Para reconstruirla desde archivos, usá el modo carpeta en Chrome.
+Downloads-mode gallery reads a private browser copy; exported files are what the skill reads. Uninstalling or clearing extension data removes the gallery copy, not downloaded files. External edits do not update this gallery. Chrome folder mode can rebuild a gallery from files.
 
-Los guardados se completan cuando terminan las imágenes, la nota y los metadatos. Si algo falla, queda pendiente y se puede reintentar conservando lo completado. `reference.json` registra el nombre real que Brave asignó a cada imagen, incluso si se renombró o agregó un número por conflicto.
+A save completes only after images, note, and metadata have finished. Failures remain pending for retry, preserving completed downloads. `reference.json` records actual image filenames, including renames and browser-added collision numbers.
 
-Conservá `note.md`, `reference.json` y la estructura por categorías. Si cambiás la ruta de descargas de Brave, también cambia el destino de las nuevas referencias: revisá la carpeta sincronizada. No cambies de destino mientras haya pendientes.
+Keep `note.md`, `reference.json`, and the category directory structure. Changing Brave's download location also changes new references' destination. Review synchronization settings and do not switch destinations while saves are pending.
 
 ## Chrome
 
-1. Abrí `chrome://extensions`, activá modo de desarrollador y cargá la carpeta `extension`, que contiene `manifest.json`.
-2. Abrí Design Shelf, elegí **Conectar carpeta** y seleccioná una carpeta dedicada. El navegador pide permiso de lectura/escritura.
-3. Recargá X y dale like a un post con imágenes.
+1. Open `chrome://extensions`, enable Developer mode, and load the `extension` directory containing `manifest.json`.
+2. Open Design Shelf, choose **Connect folder**, and select a dedicated directory. Grant the browser read/write access.
+3. Reload X and like a post with images.
 
-Chrome de escritorio 122+ para el modo carpeta. No necesitás Node, servidor ni cuenta de Google para usar la extensión. Si el navegador necesita renovar el permiso, la biblioteca muestra **Renovar acceso**.
+Folder mode requires desktop Chrome 122+. The extension needs no Node, server, or Google account. If access expires, the library shows **Renew access**.
 
-## Qué se guarda
+## Saved files
 
 ```text
 Design Shelf/
@@ -35,22 +35,22 @@ Design Shelf/
       .pending.json
 ```
 
-La categoría principal organiza la carpeta. Las etiquetas permiten buscar estilos o componentes sin repetir imágenes. Podés crear categorías desde el modal.
+The primary category determines the directory. Tags support style/component search without copying images. Create categories from the modal.
 
-Guardar requiere nota, categoría y al menos una imagen. **Omitir**, cerrar y Escape conservan el like sin guardar. Los posts sin imágenes, videos y GIFs no abren el modal. Solo se capturan imágenes del propio post, excluyendo el citado. Se solicita la mayor resolución disponible en el CDN.
+Saving requires a note, category, and at least one image. **Skip**, close, and Escape keep the like without saving. Text-only posts, videos, and GIFs do not open the modal. Images from quoted posts are excluded. The extension requests the highest available CDN resolution.
 
-Los duplicados conservan el primer guardado. Las descargas tienen límites de tiempo y tamaño. Los archivos ajenos o modificados en un guardado parcial se preservan y se informa el conflicto: revisá la carpeta antes de reintentar. No hay una transacción con otros programas que modifiquen esos archivos simultáneamente.
+Duplicates preserve the first save. Downloads have time and size limits. Foreign or changed files in a partial save are preserved and reported as a conflict. Inspect the directory before retrying; there is no transaction with other applications modifying files simultaneously.
 
-## Biblioteca y recuperación
+## Library and recovery
 
-La galería permite filtrar por categoría y buscar por nota, etiqueta, autor o texto del post. Cada referencia conserva imágenes, nota y fuente.
+Filter the gallery by category or search notes, tags, authors, and post text. Each reference preserves images, note, and source.
 
-Los guardados fallidos también necesitan la cola de la instalación original para reintentarse; reinstalar puede perderla. **No desinstales con pendientes.** Recargá la extensión y X después de una actualización y usá **Reintentar guardados** para completar lo pendiente.
+Failed saves also rely on the original installation's recovery queue. **Do not uninstall with pending saves.** Reload the extension and X after updating, then use **Retry saves** to complete pending work.
 
-Drive para escritorio sincroniza los archivos por separado; abrir Drive en una pestaña no configura sincronización. La extensión no pide credenciales de Google ni prueba una subida efectiva. En otro equipo, descargá los originales localmente para que la skill pueda abrirlos.
+Drive for desktop synchronizes files independently; opening Drive in a browser does not configure synchronization. The extension does not request Google credentials or verify uploads. Download originals locally on other machines before using the skill.
 
-## Permisos y verificación
+## Permissions and verification
 
-Manifest V3; permisos `storage` y `downloads`; content scripts en X/Twitter y acceso al CDN `pbs.twimg.com`. No hay backend, telemetría ni código remoto ejecutable en esta extensión.
+Manifest V3; `storage` and `downloads` permissions; content scripts on X/Twitter and image access to `pbs.twimg.com`. No backend, telemetry, or remotely executed code is included.
 
-Las pruebas automatizadas sirven un feed sintético, respuestas PNG controladas y usan handles OPFS reales. Cubren cola, archivos, galería, omitir, duplicados, renombrado y recuperación del worker. **No prueban** el selector nativo de carpeta externa, el DOM autenticado actual de X, las imágenes reales de X ni una sincronización efectiva con Drive/R2.
+Automated tests use a synthetic feed, controlled PNG responses, and genuine OPFS directory handles. They cover queues, files, gallery, skip, duplicates, renamed downloads, and worker recovery. They do **not** verify native external-folder selection, authenticated live X DOM, real X images, or actual Drive/R2 synchronization.
