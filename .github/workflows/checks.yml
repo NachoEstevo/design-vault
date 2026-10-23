@@ -26,7 +26,8 @@ jobs:
       - run: python scripts/check-public.py
       - run: npm pack --dry-run
   browser:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -34,5 +35,6 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install chromium
+        timeout-minutes: 5
       - run: npm run test:browser
