@@ -2,6 +2,8 @@
 
 The public repository and npm registry are separate publications. The package is prepared as `@nachoestevo/design-vault`, version `0.1.0`, but pushing does not publish it. There are no npm tokens or automatic publishing workflows in this repo.
 
+Direct GitHub installation already works without registry publication: `npx --yes --package=github:NachoEstevo/design-vault design-vault --vault-root "/path/to/Design Shelf"`. Pin a reviewed commit/tag for reproducible installation. Both GitHub and tarball installs use the same Python installer.
+
 Before release, verify scope ownership, name availability, and the intended version. `publishConfig.access=public` makes the scoped package public. Update README, `package.json`, and lockfile together if the name changes.
 
 ## Review and test without publishing

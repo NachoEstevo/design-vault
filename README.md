@@ -48,7 +48,17 @@ python scripts/install.py --vault-root "/path/to/Design Shelf" --skills-root "/p
 
 You can also copy `skills/design-vault` manually, duplicate `vault.example.json` as `vault.json` in the installed copy, and set `vault_root`. This does not install a skill in ChatGPT or guarantee equivalent tool access in every agent.
 
-### npm / npx: ready to package, not published yet
+### Install now with npx from GitHub
+
+With Node 22+ and Python 3.10+ installed, you can install directly from this repository without an npm registry release:
+
+```sh
+npx --yes --package=github:NachoEstevo/design-vault design-vault --vault-root "/path/to/Design Shelf"
+```
+
+This runs the same installer and preserves existing installations. For reproducible installs, append a reviewed commit or tag after the GitHub package name, for example `github:NachoEstevo/design-vault#8b1747f`.
+
+### npm registry: prepared, not published yet
 
 The package is prepared as `@nachoestevo/design-vault`, exposing the `design-vault` command with no npm runtime dependencies. **It is not published to the npm registry yet.** Name availability and publishing permissions must be verified before release.
 
