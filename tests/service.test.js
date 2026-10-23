@@ -21,6 +21,9 @@ class Bucket {
   async head(key) {
     return this.get(key);
   }
+  async delete(key) {
+    this.data.delete(key);
+  }
   async put(key, body, options = {}) {
     const old = this.data.get(key),
       condition = options.onlyIf;
@@ -271,4 +274,14 @@ test("retrieval sets a direction, covers each requested role and avoids near-dup
   assert.equal(roles["4:0"], "footer");
   // Two identical warm editorial looks never fill the remaining slot together.
   assert(!("1:0" in roles && "2:0" in roles));
+});
+test("owner deletes a reference and its originals; readers and strangers cannot", async () => {
+  const { call, ref, sha256, env } = await fixture();
+  await call(`/admin/objects/${sha256}`, "PUT", bytes);
+  await call("/admin/references", "POST", ref);
+  assert.equal((await call("/admin/references/12345", "DELETE", undefined, false)).status, 401);
+  assert.equal((await call("/admin/references/12345", "DELETE")).status, 200);
+  assert.equal(env.VAULT.data.has(`v1/objects/${sha256}`), false);
+  assert.deepEqual(await (await call("/admin/status")).json(), { references: 0, images: 0, reviewed: 0 });
+  assert.equal((await call("/admin/references/12345", "DELETE")).status, 404);
 });

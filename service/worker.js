@@ -57,7 +57,7 @@ export function createService() {
             status: 204,
             headers: {
               "Access-Control-Allow-Origin": "*",
-              "Access-Control-Allow-Methods": "GET,POST,PUT,OPTIONS",
+              "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
               "Access-Control-Allow-Headers": "Content-Type,Authorization",
               "Access-Control-Max-Age": "600",
             },
@@ -190,6 +190,28 @@ export function createService() {
               503,
               "Another upload is committing. Retry this reference.",
             );
+          }
+          const removal = url.pathname.match(/^\/admin\/references\/([1-9][0-9]{0,24})$/);
+          if (removal && request.method === "DELETE") {
+            for (let attempt = 0; attempt < 6; attempt++) {
+              const current = await catalog(env, true);
+              const doomed = current.value.references.find((r) => r.postId === removal[1]);
+              fail(!doomed, "Reference not found", 404);
+              const refs = current.value.references.filter((r) => r.postId !== removal[1]);
+              const committed = await env.VAULT.put(
+                CATALOG_KEY,
+                JSON.stringify({ schemaVersion: 1, references: refs }),
+                { onlyIf: { etagMatches: current.etag }, httpMetadata: { contentType: "application/json" } },
+              );
+              if (!committed) continue;
+              cache = null;
+              // Originals go too, unless another reference still points at the same bytes.
+              const kept = new Set(refs.flatMap((r) => r.images.map((image) => image.sha256)));
+              const objects = doomed.images.map((image) => image.sha256).filter((sha) => !kept.has(sha));
+              await Promise.all(objects.map((sha) => env.VAULT.delete(`v1/objects/${sha}`)));
+              return response({ ok: true, status: "deleted", objects: objects.length });
+            }
+            throw new HttpError(503, "Another upload is committing. Retry the deletion.");
           }
         }
         // There is intentionally no catalog, original, proxy, arbitrary-key or signed-URL reader route.
